@@ -7,10 +7,10 @@ const MainLayout = async ({
 }) => {
   return ( 
     <div className="h-full">
-      <div className="md:flex h-full w-[500px] z-30 flex-col fixed inset-y-0 bg-slate-200">
+      <div className="md:flex h-full w-[500px] z-30 flex-col fixed inset-y-0 border-r-2">
         <Navbar/>
       </div>
-      <main className="md:pl-[500px] h-full">
+      <main className="md:pl-[505px] h-full">
         {children}
       </main>
     </div>

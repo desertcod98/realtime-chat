@@ -3,6 +3,7 @@ import db from "@/db";
 import { chats, members } from "@/db/schema";
 import { eq, ne } from "drizzle-orm";
 import { redirect } from "next/navigation";
+import NavbarChat from "./NavbarChat";
 
 export default async function Navbar() {
   const user = await getCurrentUser();
@@ -20,6 +21,7 @@ export default async function Navbar() {
               user: {
                 columns: {
                   name: true,
+                  image: true,
                 },
               },
             },
@@ -32,14 +34,14 @@ export default async function Navbar() {
   });
 
   return (
-    <>
+    <div className="flex flex-col gap-3">
       {membersData.map((member) => {
         if(!member.chat.isGroup){
-          return <span key = {member.id }>{member.chat.members[0].user.name}</span>
+          return <NavbarChat key = {member.id } name={member.chat.members[0].user.name} chatId={member.chatId} imgUrl={member.chat.members[0].user.image ?? undefined}/>
         }else{
-          return <span key = {member.id }>{member.chat.name}</span>
+          return <NavbarChat key = {member.id } name={member.chat.name!} chatId={member.chatId} imgUrl={member.chat.image ?? undefined}/>
         }
       })}
-    </>
+    </div>
   );
 }

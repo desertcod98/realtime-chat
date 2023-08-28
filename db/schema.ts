@@ -69,6 +69,7 @@ export const chats = pgTable("chats", {
   id: uuid('id').default(sql`gen_random_uuid()`).notNull().primaryKey(),
   isGroup: boolean('is_group').default(false).notNull(),
   name: text('name'),
+  image: text('image'),
   description: text('description'),
   created_at: timestamp('created_at').notNull().defaultNow(),
 })

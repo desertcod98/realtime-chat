@@ -22,7 +22,7 @@ const Auth = () => {
             height="48"
             width="48"
             className="mx-auto w-auto"
-            src="/vercel.svg"
+            src="/assets/logo.svg"
             alt="Logo"
           />
         </Link>

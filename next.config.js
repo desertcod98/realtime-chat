@@ -2,7 +2,7 @@
 const nextConfig = {}
 
 module.exports = {
-  experimental: {
-    serverActions: true,
-  },
+  images: {
+    domains: ["pub-a43a3962549e4cdd8496391be5998a56.r2.dev"],
+  }
 }

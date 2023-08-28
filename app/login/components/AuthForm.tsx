@@ -8,6 +8,7 @@ import { BsGithub, BsGoogle } from "react-icons/bs";
 import { toast } from "react-hot-toast";
 import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import UploadProfilePic from "./UploadProfilePic";
 
 enum Variant {
   Login,
@@ -130,6 +131,7 @@ export default function AuthForm() {
             register={register}
             errors={errors}
           />
+          <UploadProfilePic/>
           <div>
             <Button disabled={isLoading} fullWidth type="submit">
               {variant === Variant.Login ? "Sign in" : "Register"}

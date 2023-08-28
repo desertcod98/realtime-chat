@@ -1,7 +1,6 @@
 "use client";
 import axios from "axios";
 import { useForm } from "react-hook-form";
-import https from "https";
 
 interface FormSubmitData {
   file: FileList;
@@ -11,8 +10,9 @@ export default function Testr2() {
   const {register, handleSubmit} = useForm<FormSubmitData>();
 
   async function onSubmit(data: FormSubmitData) {
-    const putUrl : string = (await axios.put("/api/upload", {fileName: data.file[0].name})).data.putUrl;
+    const {putUrl, key} = (await axios.put("/api/upload", {fileName: data.file[0].name})).data;
     await axios.put(putUrl, data.file[0]);
+    console.log(process.env.NEXT_PUBLIC_R2_PROFILE+key);
   }
 
   return (

@@ -9,12 +9,13 @@ interface RequestData{
   email: string;
   name: string;
   password: string;
+  imgUrl: string | undefined;
 }
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { email, name, password } : RequestData = body;
+    const { email, name, password, imgUrl } : RequestData = body;
 
     if (!email || !password || !name) {
       return new NextResponse("Missing info", { status: 400 });
@@ -33,6 +34,7 @@ export async function POST(request: Request) {
       name,
       hashedPassword,
       id: createId(),
+      image: imgUrl ?? undefined
     }).returning()
 
     return NextResponse.json(user);

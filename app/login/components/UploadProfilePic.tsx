@@ -4,14 +4,20 @@ import Spinner from "@/app/components/Spinner";
 import axios from "axios";
 import clsx from "clsx";
 import Image from "next/image";
-import { useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import Dropzone from "react-dropzone";
+import { FieldValues, UseFormRegister } from "react-hook-form";
 import { AiOutlineCloudUpload } from "react-icons/ai";
 
-export default function UploadProfilePic() {
+export default function UploadProfilePic({
+  imgUrl,
+  setImgUrl,
+}: {
+  imgUrl: string | undefined;
+  setImgUrl: Dispatch<SetStateAction<string | undefined>>;
+}) {
   const [dragHovering, setDragHovering] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [imgUrl, setImgUrl] = useState<string>();
 
   async function handleFile(files: File[]) {
     setIsLoading(true);
@@ -29,7 +35,10 @@ export default function UploadProfilePic() {
     <div className="flex justify-center w-full">
       {imgUrl ? (
         <div className="w-60 flex justify-center relative">
-          <div className="absolute top-0 right-0 z-10 rounded-2xl border-2 cursor-pointer" onClick={() => setImgUrl(undefined)}>
+          <div
+            className="absolute top-0 right-0 z-10 rounded-2xl border-2 cursor-pointer"
+            onClick={() => setImgUrl(undefined)}
+          >
             <Image
               src={"/assets/x.svg"}
               alt="Remove"

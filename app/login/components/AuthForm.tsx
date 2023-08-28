@@ -19,6 +19,7 @@ export default function AuthForm() {
   const session = useSession();
   const [variant, setVariant] = useState<Variant>(Variant.Login);
   const [isLoading, setIsLoading] = useState(false);
+  const [imgUrl, setImgUrl] = useState<string>();
   const router = useRouter();
 
   useEffect(() => {
@@ -48,6 +49,9 @@ export default function AuthForm() {
   });
 
   const onSubmit: SubmitHandler<FieldValues> = (data) => {
+    if(imgUrl){
+      data.imgUrl = imgUrl;
+    }
     setIsLoading(true);
     if (variant === Variant.Register) {
       fetch("/api/register", {
@@ -131,7 +135,9 @@ export default function AuthForm() {
             register={register}
             errors={errors}
           />
-          <UploadProfilePic/>
+          {variant === Variant.Register && (
+            <UploadProfilePic imgUrl={imgUrl} setImgUrl={setImgUrl}/>
+          )}
           <div>
             <Button disabled={isLoading} fullWidth type="submit">
               {variant === Variant.Login ? "Sign in" : "Register"}

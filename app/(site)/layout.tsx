@@ -1,4 +1,4 @@
-import Navbar from "./components/navbar/Navbar";
+import Navbar from './components/navbar/Navbar';
 
 const MainLayout = async ({
   children
@@ -8,7 +8,7 @@ const MainLayout = async ({
   return ( 
     <div className="h-full">
       <div className="md:flex h-full w-[500px] z-30 flex-col fixed inset-y-0 border-r-2">
-        <Navbar/>
+        <Navbar/> 
       </div>
       <main className="md:pl-[505px] h-full">
         {children}

@@ -76,6 +76,7 @@ export const chats = pgTable("chats", {
 
 export const chatsRelations = relations(chats, ({many}) => ({
   members: many(members),
+  messages: many(messages),
 }))
 
 export const messages = pgTable("messages", {
@@ -84,6 +85,7 @@ export const messages = pgTable("messages", {
   content: text('content'),
   fileKey: text('file_key'),
   memberId: integer('member_id').notNull().references(() => members.id),
+  chatId: uuid('chat_id').notNull().references(() => chats.id),
   updatedAt: timestamp('created_at').notNull().defaultNow(),
 }, (t) => ({
   unq: unique().on(t.createdAt, t.memberId),
@@ -95,6 +97,10 @@ export const messagesRelations = relations(messages, ({one, many}) => ({
     references: [members.id],
   }),
   seenMessages: many(seenMessages),
+  chat: one(chats, {
+    fields: [messages.chatId],
+    references: [chats.id],    
+  })
 }))
 
 export const members = pgTable("members", {

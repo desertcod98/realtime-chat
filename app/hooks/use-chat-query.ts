@@ -2,7 +2,7 @@ import qs from "query-string";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { FullMessage } from "../types";
 
-export const useChatQuery = (chatId: string, initialMessages: FullMessage[]) => {
+export const useChatQuery = (chatId: string) => {
 
   const fetchMessages = async ({ pageParam = undefined }) => {
     const url = qs.stringifyUrl({

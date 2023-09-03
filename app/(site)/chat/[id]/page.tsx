@@ -5,65 +5,47 @@ import { and, desc, eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import Body from "./components/Body";
 
-interface ChatParams{
+interface ChatParams {
   id: string;
 }
 
-export default async function Chat({params} : {params: ChatParams}){
+export default async function Chat({ params }: { params: ChatParams }) {
   const user = await getCurrentUser();
-  if(!user){
+  if (!user) {
     redirect("/");
   }
+
+  // const memberData = await db.select({id: members.id}).from(members).where(and(eq(members.userId, user.id), eq(members.chatId, params.id)));
+  // if(memberData.length === 0){
+  //   redirect("/");
+  // }
 
   let memberData = undefined;
 
-  try{
+  try {
     memberData = await db.query.members.findFirst({
+      columns: {
+        chatId: true,
+      },
       with: {
         chat: {
-          with: {
-            members: true,
-            messages: {
-              limit: 3,
-              orderBy: desc(messages.id),
-              with: {
-                seenMessages: {
-                  columns: {
-                    createdAt: true,
-                  },
-                  with: {
-                    member: {
-                      columns: {
-                        id: true,
-                      },
-                      with:{
-                        user: {
-                          columns: {
-                            name: true,
-                            image: true,
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
+          columns: {
+            isGroup: true,
+          }
         },
       },
       where: and(eq(members.userId, user.id), eq(members.chatId, params.id)),
-    })
-  }catch(e){
+    });
+  } catch (e) {
     redirect("/");
   }
-  if(!memberData){
+  if (!memberData) {
     redirect("/");
   }
-
   return (
-
-      <Body initialMessages={memberData.chat.messages} chatId={memberData.chatId}/>
-
-  )
+    <Body
+      isGroup={memberData.chat.isGroup}
+      chatId={memberData.chatId}
+    />
+  );
 }

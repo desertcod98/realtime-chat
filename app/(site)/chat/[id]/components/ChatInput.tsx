@@ -11,6 +11,7 @@ import { useQueryClient } from "@tanstack/react-query";
 
 const formSchema = z.object({
   content: z.string().min(1),
+  imageUrl
 });
 
 export default function ChatInput({ chatId }: { chatId: string }) {
@@ -30,15 +31,11 @@ export default function ChatInput({ chatId }: { chatId: string }) {
       const url = "/api/messages/" + chatId;
       const res = await axios.post(url, values);
       form.reset();
-      queryClient.refetchQueries(["chat:"+chatId]); //use optimistic update instead
+      queryClient.refetchQueries(["chat:" + chatId]); //use optimistic update instead
     } catch (error) {
       console.log(error);
     }
   };
-
-  function doOptimisticUpdate(data: FullMessage){
-
-  }
 
   return (
     <Form {...form}>
@@ -54,6 +51,24 @@ export default function ChatInput({ chatId }: { chatId: string }) {
                   className="w-full"
                   placeholder="Send a message"
                   {...field}
+                />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name=""
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <Input
+                  type="file"
+                  id="images"
+                  {...field}
+                  accept="image/*"
+                  multiple
+                  required
                 />
               </FormControl>
             </FormItem>

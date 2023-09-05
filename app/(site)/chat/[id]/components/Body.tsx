@@ -6,6 +6,8 @@ import { ElementRef, Fragment, useEffect, useRef, useState } from "react";
 import { useChatQuery } from "@/app/hooks/use-chat-query";
 import { useInView } from "react-intersection-observer";
 import ChatInput from "./ChatInput";
+import { pusherClient } from "@/lib/pusher";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function Body({
   chatId,
@@ -16,19 +18,44 @@ export default function Body({
 }) {
   const bottomRef = useRef<ElementRef<"div">>(null);
   const chatRef = useRef<ElementRef<"div">>(null);
-
+  const queryClient = useQueryClient();
   const { ref, inView } = useInView();
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status } =
     useChatQuery(chatId);
 
-  // useChatScroll({
-  //   chatRef,
-  //   bottomRef,
-  //   loadMore: fetchNextPage,
-  //   shouldLoadMore: !isFetchingNextPage && !!hasNextPage,
-  //   count: data?.pages?.[0]?.items?.length ?? 0,
-  // })
+
+    function onNewMessage(message: FullMessage){
+      queryClient.setQueryData(["chat:"+chatId], (oldData : any) => {
+        if (!oldData || !oldData.pages || oldData.pages.length === 0) {
+          return {
+            pages: [{
+              items: [message],
+            }]
+          }
+        }
+        const newData = [...oldData.pages];
+
+        newData[0] = {
+          ...newData[0],
+          items: [
+            message,
+            ...newData[0].items,
+          ]
+        };
+        return {
+          ...oldData,
+          pages: newData,
+        };
+      })
+    }
+
+    const channelName = `chat=${chatId}`;
+
+    useEffect(() => {
+      pusherClient.subscribe(channelName);
+      pusherClient.bind('message=new', onNewMessage);
+    }, []);
 
   useEffect(() => {
     if (inView && hasNextPage) {
@@ -38,13 +65,6 @@ export default function Body({
 
   useEffect(() => {
     if (data?.pages?.length === 1) bottomRef.current?.scrollIntoView();
-    // else{
-    //   const nNewItems : number = data?.pages[data.pages.length-1].length;
-    //   if(chatRef.current){
-    //     console.log(chatRef.current.scrollTop);
-    //   }
-    // }
-    // console.log(chatRef.current?.scrollHeight);
   }, [data]);
 
   return (

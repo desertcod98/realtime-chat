@@ -1,6 +1,7 @@
 import getCurrentUser from "@/app/actions/getCurrentUser";
 import db from "@/db";
 import { members, messages, users } from "@/db/schema";
+import { pusherServer } from "@/lib/pusher";
 import { and, desc, eq, lt } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { z } from "zod";
@@ -168,6 +169,9 @@ export async function POST(
       seenMessages: []
     }};
 
+    const channelName = `chat=${chatId.data}`;
+
+    await pusherServer.trigger(channelName, 'message=new', fullNewMessage);
     return NextResponse.json(fullNewMessage);
   } catch (error: any) {
     console.log(error, "POST_MESSAGE_ERROR");

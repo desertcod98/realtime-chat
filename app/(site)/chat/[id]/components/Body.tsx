@@ -83,7 +83,7 @@ export default function Body({
         ))}
         <div ref={ref} />
       </div>
-      <div className="absolute bottom-5 w-full flex justify-center">
+      <div className="absolute bottom-5 w-[97%] flex justify-center">
         <ChatInput chatId={chatId}/>
       </div>
     </div>

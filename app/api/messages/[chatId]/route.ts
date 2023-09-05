@@ -1,6 +1,6 @@
 import getCurrentUser from "@/app/actions/getCurrentUser";
 import db from "@/db";
-import { members, messages, users } from "@/db/schema";
+import { members, messageFiles, messages, users } from "@/db/schema";
 import { pusherServer } from "@/lib/pusher";
 import { and, desc, eq, lt } from "drizzle-orm";
 import { NextResponse } from "next/server";
@@ -88,6 +88,7 @@ export async function GET(
       ),
     });
   } catch (e) {
+    console.log(e, "GET_MESSAGES_ERROR");
     return new NextResponse("Bad request", { status: 400 });
   }
 
@@ -110,7 +111,11 @@ export async function GET(
 }
 
 const PostData = z.object({
-  content: z.string().min(1),
+  content: z.string().min(1).optional(),
+  uploadedFiles: z.array(z.object({
+    name: z.string().min(1),
+    key: z.string().min(1),
+  })).optional() 
 });
 
 const ChatId = z.string().uuid();
@@ -133,6 +138,10 @@ export async function POST(
 
     if (!zodParse.success || !chatId.success) {
       console.log(zodParse.error);
+      return new NextResponse("Bad request", { status: 400 });
+    }
+    
+    if(!zodParse.data.content && (!zodParse.data.uploadedFiles || zodParse.data.uploadedFiles.length === 0 )){
       return new NextResponse("Bad request", { status: 400 });
     }
 
@@ -159,6 +168,10 @@ export async function POST(
         content: zodParse.data.content,
       })
       .returning();
+    
+    if(zodParse.data.uploadedFiles && zodParse.data.uploadedFiles.length > 0) await db.insert(messageFiles).values(zodParse.data.uploadedFiles.map(file => {
+      return {...file, messageId: newMessage.id}
+    }));
 
     const fullNewMessage = {...newMessage, member: {
       id: memberData[0].id,

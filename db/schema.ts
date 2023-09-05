@@ -83,12 +83,28 @@ export const messages = pgTable("messages", {
   id: serial('id').primaryKey(),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   content: text('content'),
-  fileKey: text('file_key'),
   memberId: integer('member_id').notNull().references(() => members.id),
   chatId: uuid('chat_id').notNull().references(() => chats.id),
   updatedAt: timestamp('created_at').notNull().defaultNow(),
 }, (t) => ({
   unq: unique().on(t.createdAt, t.memberId),
+}))
+
+export const messageFiles = pgTable("message_files", {
+  id: serial('id').primaryKey(),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  key: text('key').notNull(),
+  name: text('name').notNull(),
+  messageId: integer('message_id').notNull().references(() => messages.id),
+}, (t) => ({
+  unq: unique().on(t.key, t.name),
+}))
+
+export const messageFilesRelations = relations(messageFiles, ({one}) => ({
+  message: one(messages, {
+    fields: [messageFiles.messageId],
+    references: [messages.id],
+  })
 }))
 
 export const messagesRelations = relations(messages, ({one, many}) => ({
@@ -100,7 +116,8 @@ export const messagesRelations = relations(messages, ({one, many}) => ({
   chat: one(chats, {
     fields: [messages.chatId],
     references: [chats.id],    
-  })
+  }),
+  messageFiles: many(messageFiles)
 }))
 
 export const members = pgTable("members", {

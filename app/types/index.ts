@@ -5,6 +5,10 @@ export type FullMessage = {
   fileKey: string | null;
   memberId: number;
   updatedAt: Date;
+  messageFiles: {
+    url: string;
+    name: string;
+  }[];
   member: {
     id: number;
     user: {

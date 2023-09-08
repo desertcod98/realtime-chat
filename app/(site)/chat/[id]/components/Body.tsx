@@ -17,7 +17,6 @@ export default function Body({
   isGroup: boolean;
 }) {
   const bottomRef = useRef<ElementRef<"div">>(null);
-  const chatRef = useRef<ElementRef<"div">>(null);
   const queryClient = useQueryClient();
   const { ref, inView } = useInView();
 
@@ -71,7 +70,6 @@ export default function Body({
     <div className="flex flex-col gap-5 relative w-full h-full">
       <div
         className="flex-1 flex flex-col-reverse mt-auto overflow-y-auto h-full gap-5 mb-14"
-        ref={chatRef}
       >
         <div ref={bottomRef} />
         {data?.pages?.map((group, i) => (
@@ -81,7 +79,7 @@ export default function Body({
             ))}
           </Fragment>
         ))}
-        <div ref={ref} />
+        <div ref={ref} className="w-full mt-5"></div>
       </div>
       <div className="absolute bottom-5 w-[97%] flex justify-center">
         <ChatInput chatId={chatId}/>

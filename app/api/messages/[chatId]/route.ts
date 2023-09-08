@@ -2,6 +2,9 @@ import getCurrentUser from "@/app/actions/getCurrentUser";
 import db from "@/db";
 import { members, messageFiles, messages, users } from "@/db/schema";
 import { pusherServer } from "@/lib/pusher";
+import s3 from "@/lib/s3";
+import { GetObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { and, desc, eq, lt } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { z } from "zod";
@@ -44,6 +47,12 @@ export async function GET(
               limit: messages_batch,
               orderBy: desc(messages.id),
               with: {
+                messageFiles: {
+                  columns: {
+                    key: true,
+                    name: true,
+                  },
+                },
                 member: {
                   columns: {
                     id: true,
@@ -103,7 +112,29 @@ export async function GET(
       nextCursor = member.chat.messages[messages_batch - 1].id;
     }
 
-    return NextResponse.json({ items: member.chat.messages, nextCursor });
+    const fullMessages = await Promise.all(
+      member.chat.messages.map(async (message) => {
+        const { messageFiles, ...rest } = message;
+        const messageFilesUrls = await Promise.all(
+          messageFiles.map(async (file) => {
+            return {
+              url: await getSignedUrl(
+                s3,
+                new GetObjectCommand({
+                  Bucket: "realtime-chat",
+                  Key: file.key,
+                }),
+                { expiresIn: 3600 }
+              ),
+              name: file.name,
+            };
+          })
+        );
+        return { ...rest, messageFiles: messageFilesUrls };
+      })
+    );
+
+    return NextResponse.json({ items: fullMessages, nextCursor });
   } catch (error: any) {
     console.log(error, "GET_MESSAGES_ERROR");
     return new NextResponse("Internal Error", { status: 500 });
@@ -112,10 +143,14 @@ export async function GET(
 
 const PostData = z.object({
   content: z.string().min(1).optional(),
-  uploadedFiles: z.array(z.object({
-    name: z.string().min(1),
-    key: z.string().min(1),
-  })).optional() 
+  uploadedFiles: z
+    .array(
+      z.object({
+        name: z.string().min(1),
+        key: z.string().min(1),
+      })
+    )
+    .optional(),
 });
 
 const ChatId = z.string().uuid();
@@ -140,8 +175,11 @@ export async function POST(
       console.log(zodParse.error);
       return new NextResponse("Bad request", { status: 400 });
     }
-    
-    if(!zodParse.data.content && (!zodParse.data.uploadedFiles || zodParse.data.uploadedFiles.length === 0 )){
+
+    if (
+      !zodParse.data.content &&
+      (!zodParse.data.uploadedFiles || zodParse.data.uploadedFiles.length === 0)
+    ) {
       return new NextResponse("Bad request", { status: 400 });
     }
 
@@ -149,12 +187,7 @@ export async function POST(
       .select({ id: members.id, name: users.name, image: users.image })
       .from(members)
       .innerJoin(users, eq(members.userId, users.id))
-      .where(
-        and(
-          eq(members.userId, user.id),
-          eq(members.chatId, chatId.data)
-        )
-      );
+      .where(and(eq(members.userId, user.id), eq(members.chatId, chatId.data)));
 
     if (memberData.length === 0) {
       return new NextResponse("Forbidden", { status: 403 });
@@ -168,23 +201,50 @@ export async function POST(
         content: zodParse.data.content,
       })
       .returning();
-    
-    if(zodParse.data.uploadedFiles && zodParse.data.uploadedFiles.length > 0) await db.insert(messageFiles).values(zodParse.data.uploadedFiles.map(file => {
-      return {...file, messageId: newMessage.id}
-    }));
 
-    const fullNewMessage = {...newMessage, member: {
-      id: memberData[0].id,
-      user: {
-        name: memberData[0].name,
-        image: memberData[0].image,
+    let messageFilesUrls: any[] = [];
+
+    if (zodParse.data.uploadedFiles && zodParse.data.uploadedFiles.length > 0) {
+      await db.insert(messageFiles).values(
+        zodParse.data.uploadedFiles.map((file) => {
+          return { ...file, messageId: newMessage.id };
+        })
+      );
+      messageFilesUrls = await Promise.all(
+        zodParse.data.uploadedFiles.map(async (file) => {
+          return {
+            url: await getSignedUrl(
+              s3,
+              new GetObjectCommand({
+                Bucket: "realtime-chat",
+                Key: file.key,
+              }),
+              { expiresIn: 3600 }
+            ),
+            name: file.name,
+          };
+        })
+      );
+    }
+
+    const fullNewMessage = {
+      ...newMessage,
+      member: {
+        id: memberData[0].id,
+        user: {
+          name: memberData[0].name,
+          image: memberData[0].image,
+        },
+        seenMessages: [],
       },
-      seenMessages: []
-    }};
+      messageFiles: messageFilesUrls,
+    };
+
+    //TODO return added images
 
     const channelName = `chat=${chatId.data}`;
 
-    await pusherServer.trigger(channelName, 'message=new', fullNewMessage);
+    await pusherServer.trigger(channelName, "message=new", fullNewMessage);
     return NextResponse.json(fullNewMessage);
   } catch (error: any) {
     console.log(error, "POST_MESSAGE_ERROR");

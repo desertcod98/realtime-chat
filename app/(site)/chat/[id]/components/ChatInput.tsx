@@ -9,6 +9,7 @@ import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 import { useQueryClient } from "@tanstack/react-query";
 import MessageAttachment from "./AddMessageAttachments";
 import { useState } from "react";
+import { useChatMutation } from "@/app/hooks/use-chat-query";
 
 const formSchema = z.object({
   content: z.string().min(1).optional(),
@@ -17,6 +18,7 @@ const formSchema = z.object({
 export default function ChatInput({ chatId }: { chatId: string }) {
   const queryClient = useQueryClient();
   const [files, setFiles] = useState<File[]>([]);
+  const chatMutation = useChatMutation();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -36,10 +38,9 @@ export default function ChatInput({ chatId }: { chatId: string }) {
         uploadedFiles = await uploadFiles(files);
       }
 
-      const url = "/api/messages/" + chatId;
-      const res = await axios.post(url, { ...values, uploadedFiles });
+      chatMutation.mutate({chatId, ...values, uploadedFiles});
       form.reset();
-      queryClient.refetchQueries(["chat:" + chatId]); //use optimistic update instead
+      setFiles([]);
     } catch (error) {
       console.log(error);
     }

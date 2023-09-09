@@ -7,8 +7,8 @@ import { ReactQueryContext } from "./context/ReactQueryContext";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-  title: "nextjs-boilerplate",
-  description: "nextjs-boilerplate",
+  title: "Realtime chat",
+  description: "Send messages in real time to friends!",
 };
 
 export default function RootLayout({

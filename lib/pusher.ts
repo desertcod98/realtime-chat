@@ -2,21 +2,22 @@ import PusherServer from 'pusher'
 import PusherClient from 'pusher-js'
 
 export const pusherServer = new PusherServer({
-  host: '127.0.0.1',
-  port: '6001',
-  appId: 'app-id',
-  key: 'app-key',
-  secret: 'app-secret',
-  useTLS: false,
+  // host: process.env.NEXT_PUBLIC_SOKET_URL!,
+  // port: '6001',
+  appId: process.env.NEXT_PUBLIC_app_id!,
+  key: process.env.NEXT_PUBLIC_key!,
+  secret: process.env.secret!,
+  cluster: 'eu',
+  useTLS: true,
 });
 
 export const pusherClient = new PusherClient(
-  'app-key',
+  process.env.NEXT_PUBLIC_key!,
   {
-    wsHost: '127.0.0.1',
-    wsPort: 6001,
-    forceTLS: false,
-    enabledTransports: ['ws', 'wss'],
+    // wsHost: process.env.NEXT_PUBLIC_SOKET_URL!,
+    // wsPort: 6001,
+    // forceTLS: false,
+    // enabledTransports: ['ws', 'wss'],
     cluster: 'eu',
   }
 );

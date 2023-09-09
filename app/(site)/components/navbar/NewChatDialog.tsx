@@ -56,7 +56,6 @@ export default function NewChatDialog() {
       }
     });
   }
-  console.log(isGroup);
   return (
     <Dialog onOpenChange={() => form.reset()}>
       <DialogTrigger>

@@ -51,6 +51,5 @@ export const useChatMutation = () => {
       const url = "/api/messages/" + chatId;
       return axios.post(url, { content, uploadedFiles });
     },
-    onMutate: () => console.log("a"),
   });
 };

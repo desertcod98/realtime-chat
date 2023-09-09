@@ -16,7 +16,7 @@ import type { AdapterAccount } from "next-auth/adapters";
 export const users = pgTable("user", {
   id: text("id").notNull().primaryKey(),
   name: text("name").notNull(),
-  email: text("email").notNull(),
+  email: text("email").notNull().unique(),
   emailVerified: timestamp("emailVerified", { mode: "date" }),
   image: text("image"),
   created_at: timestamp('created_at').notNull().defaultNow(),
@@ -73,6 +73,28 @@ export const chats = pgTable("chats", {
   description: text('description'),
   created_at: timestamp('created_at').notNull().defaultNow(),
 })
+
+export const invites = pgTable("invites", {
+  id: serial('id').primaryKey(),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  expiresAt: timestamp('expires_at').notNull(),
+  code:  uuid('id').default(sql`gen_random_uuid()`).notNull(),
+  inviterId: integer('inviter_id').notNull().references(() => members.id),
+  invitedId: text('invited_id').notNull().references(() => users.id),
+}, (t) => ({
+  unq: unique().on(t.inviterId, t.invitedId, t.expiresAt),
+}))
+
+export const invitesRelations = relations(invites, ({one}) => ({
+  inviter: one(members, {
+    fields: [invites.inviterId],
+    references: [members.id],
+  }),
+  invited: one(users, {
+    fields: [invites.invitedId],
+    references: [users.id],
+  })
+}))
 
 export const chatsRelations = relations(chats, ({many}) => ({
   members: many(members),
@@ -133,6 +155,7 @@ export const members = pgTable("members", {
 
 export const usersRelations = relations(users, ({many}) => ({
   members: many(members),
+  invites: many(invites),
 }))
 
 export const membersRelations = relations(members, ({many, one}) => ({
@@ -145,7 +168,8 @@ export const membersRelations = relations(members, ({many, one}) => ({
   chat: one(chats, {
     fields: [members.chatId],
     references: [chats.id],
-  })
+  }),
+  invites: many(invites),
 }))
 
 export const seenMessages = pgTable("seen_messages", {

@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
 import LogoutButton from "./LogoutButton";
+import NewChatDialog from "./NewChatDialog";
 
 export default async function Footer() {
   const user = await getCurrentUser();
@@ -18,9 +19,14 @@ export default async function Footer() {
           <AvatarImage src={user.image ?? undefined} />
           <AvatarFallback>{user.name[0]}</AvatarFallback>
         </Avatar>
-        <span className="text-ellipsis whitespace-nowrap overflow-hidden">{user.name}</span>
+        <span className="text-ellipsis whitespace-nowrap overflow-hidden">
+          {user.name}
+        </span>
       </Link>
-      <LogoutButton/>
+      <div className="flex gap-6">
+        <NewChatDialog />
+        <LogoutButton />
+      </div>
     </div>
   );
 }

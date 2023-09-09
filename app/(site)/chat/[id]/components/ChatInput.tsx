@@ -38,7 +38,7 @@ export default function ChatInput({ chatId }: { chatId: string }) {
         uploadedFiles = await uploadFiles(files);
       }
 
-      chatMutation.mutate({chatId, ...values, uploadedFiles});
+      chatMutation.mutate({ chatId, ...values, uploadedFiles });
       form.reset();
       setFiles([]);
     } catch (error) {
@@ -53,7 +53,10 @@ export default function ChatInput({ chatId }: { chatId: string }) {
     );
     const data: { name: string; putUrl: string; key: string }[] = res.data;
     const uploads = data.map((file) => {
-      return axios.put(file.putUrl, files.filter(f => f.name === file.name)[0]);
+      return axios.put(
+        file.putUrl,
+        files.filter((f) => f.name === file.name)[0]
+      );
     });
     await Promise.all(uploads);
     return data;
@@ -80,6 +83,7 @@ export default function ChatInput({ chatId }: { chatId: string }) {
                     />
                   </div>
                   <Input
+                    disabled={isLoading}
                     type="text"
                     className="w-full pl-10"
                     placeholder="Send a message"

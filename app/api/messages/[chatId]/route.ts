@@ -172,7 +172,6 @@ export async function POST(
     const chatId = ChatId.safeParse(params.chatId);
 
     if (!zodParse.success || !chatId.success) {
-      console.log(zodParse.error);
       return new NextResponse("Bad request", { status: 400 });
     }
 

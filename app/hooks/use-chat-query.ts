@@ -1,6 +1,7 @@
 import qs from "query-string";
 import { useInfiniteQuery, useMutation } from "@tanstack/react-query";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
+import toast from "react-hot-toast";
 
 export const useChatQuery = (chatId: string) => {
   const fetchMessages = async ({ pageParam = undefined }) => {
@@ -50,6 +51,10 @@ export const useChatMutation = () => {
     }) => {
       const url = "/api/messages/" + chatId;
       return axios.post(url, { content, uploadedFiles });
+    },
+    onError: (err: any) => {
+      console.log(err);
+      if(err.response && err.response.data) toast.error(err.response.data);
     },
   });
 };

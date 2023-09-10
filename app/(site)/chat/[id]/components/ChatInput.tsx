@@ -11,13 +11,16 @@ import MessageAttachment from "./AddMessageAttachments";
 import { useState } from "react";
 import { useChatMutation } from "@/app/hooks/use-chat-query";
 import UploadAttachment from "./UploadAttachment";
+import toast from "react-hot-toast";
 
 const formSchema = z.object({
-  content: z.string().min(1).optional(),
+  content: z
+    .union([z.string().length(0), z.string().min(1)])
+    .optional()
+    .transform((e) => (e === "" ? undefined : e)),
 });
 
 export default function ChatInput({ chatId }: { chatId: string }) {
-  const queryClient = useQueryClient();
   const [files, setFiles] = useState<File[]>([]);
   const chatMutation = useChatMutation();
 
@@ -32,19 +35,19 @@ export default function ChatInput({ chatId }: { chatId: string }) {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      if (!values.content && files.length === 0) return;
-
       let uploadedFiles: { name: string; key: string }[] = [];
       if (files.length > 0) {
         uploadedFiles = await uploadFiles(files);
       }
 
+      if(uploadedFiles.length === 0 && !values.content ){
+        return;
+      }
+
       chatMutation.mutate({ chatId, ...values, uploadedFiles });
       form.reset();
       setFiles([]);
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
   };
 
   async function uploadFiles(files: File[]) {
@@ -66,7 +69,7 @@ export default function ChatInput({ chatId }: { chatId: string }) {
   return (
     <div className="flex flex-col w-full gap-2">
       {files && files.length > 0 && (
-        <div className="w-full h-60 bg-slate-200 flex items-center p-3 rounded-xl">
+        <div className="w-full h-60 bg-slate-200 flex items-center p-3 rounded-xl gap-3">
           {files.map((file) => {
             return (
               <UploadAttachment

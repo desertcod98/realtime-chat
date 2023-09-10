@@ -142,7 +142,7 @@ export async function GET(
 }
 
 const PostData = z.object({
-  content: z.string().min(1).optional(),
+  content: z.union([z.string().length(0), z.string().min(1)]).optional(),
   uploadedFiles: z
     .array(
       z.object({
@@ -179,7 +179,7 @@ export async function POST(
       !zodParse.data.content &&
       (!zodParse.data.uploadedFiles || zodParse.data.uploadedFiles.length === 0)
     ) {
-      return new NextResponse("Bad request", { status: 400 });
+      return new NextResponse("No message or files sent", { status: 400 });
     }
 
     const memberData = await db

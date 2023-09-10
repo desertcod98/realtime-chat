@@ -43,7 +43,7 @@ export default function NavbarChats({
   const [searchQuery, setSearchQuery] = useState<string>();
 
   return (
-    <div className="flex flex-col gap-3 p-3">
+    <div className="flex flex-col gap-3 p-3 overflow-y-auto">
       <Input type="text" placeholder="Search chat..." onChange={e => setSearchQuery(e.target.value)}/>
       <ScrollArea>
         {membersData.map((member) => {

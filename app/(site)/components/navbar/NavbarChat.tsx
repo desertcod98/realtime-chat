@@ -22,7 +22,7 @@ export default function NavbarChat({
   return (
     <div
       className={clsx(
-        "flex w-full px-3 h-20 border-b-2 items-center gap-10 cursor-pointer",
+        "flex w-[95%] px-3 h-20 border-b-2 items-center gap-10 cursor-pointer",
         active && "bg-slate-300"
       )}
       onClick={() => {

@@ -83,7 +83,7 @@ export default function Body({
       </div>
       <div className="w-[97%] flex justify-center mb-3">
         <ChatInput chatId={chatId}/>
-      </div>
+      </div>                                    
     </div>
   );
 }

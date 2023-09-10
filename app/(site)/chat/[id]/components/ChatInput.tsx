@@ -6,12 +6,10 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
-import { useQueryClient } from "@tanstack/react-query";
 import MessageAttachment from "./AddMessageAttachments";
 import { useState } from "react";
 import { useChatMutation } from "@/app/hooks/use-chat-query";
 import UploadAttachment from "./UploadAttachment";
-import toast from "react-hot-toast";
 
 const formSchema = z.object({
   content: z

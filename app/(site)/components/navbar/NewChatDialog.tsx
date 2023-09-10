@@ -1,5 +1,6 @@
 "use client";
 
+import UploadProfilePic from "@/app/login/components/UploadProfilePic";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -27,26 +28,53 @@ import toast from "react-hot-toast";
 import { AiOutlinePlus } from "react-icons/ai";
 import { z } from "zod";
 
-const formSchema = z.object({
-  userEmail: z.string().min(1),
-  // isGroup: z.boolean(),
-  // groupName: z.string().min(1).optional(), //TODO finish
-});
+// const formSchema = z.object({
+//   userEmail: z.string().min(1),
+//   isGroup: z.boolean(),
+//   groupName: z.string().min(1).optional(), //TODO finish
+// });
+
+const formSchema = z.discriminatedUnion("isGroup", [
+  z.object({
+    isGroup: z.literal(false),
+    userEmail: z.string().min(1),
+  }),
+  z.object({
+    isGroup: z.literal(true),
+    groupName: z.string().min(1),
+    groupDescription: z
+      .union([z.string().length(0), z.string().min(1)])
+      .optional()
+      .transform((e) => (e === "" ? undefined : e)),
+  }),
+]);
 
 export default function NewChatDialog() {
   const router = useRouter();
   const [isGroup, setIsGroup] = useState(false);
+  const [imgUrl, setImgUrl] = useState<string>();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       userEmail: "",
+      //@ts-ignore
+      groupDescription: "",
+      groupName: "",
+      isGroup: false,
     },
   });
 
   function onSubmit(data: z.infer<typeof formSchema>) {
     fetch("/api/chat", {
       method: "POST",
-      body: JSON.stringify(data),
+      body: JSON.stringify(
+        !isGroup
+          ? data
+          : {
+              ...data,
+              imgUrl,
+            }
+      ),
     }).then((res) => {
       if (res.status !== 200) {
         res.text().then((error) => toast.error(error));
@@ -57,7 +85,12 @@ export default function NewChatDialog() {
     });
   }
   return (
-    <Dialog onOpenChange={() => form.reset()}>
+    <Dialog
+      onOpenChange={() => {
+        form.reset();
+        setIsGroup(false);
+      }}
+    >
       <DialogTrigger>
         <AiOutlinePlus size={35} className="opacity-80" />
       </DialogTrigger>
@@ -66,11 +99,11 @@ export default function NewChatDialog() {
           <DialogTitle>Create new chat</DialogTitle>
           <Form {...form}>
             <form className="space-y-5" onSubmit={form.handleSubmit(onSubmit)}>
-              {/* <FormField
+              <FormField
                 control={form.control}
                 name="isGroup"
                 render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 shadow">
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 shadow mt-5">
                     <FormControl>
                       <Checkbox
                         checked={field.value}
@@ -81,30 +114,65 @@ export default function NewChatDialog() {
                       />
                     </FormControl>
                     <div className="space-y-1 leading-none">
-                      <FormLabel>
-                        Use different settings for my mobile devices
-                      </FormLabel>
-                      <FormDescription>asd</FormDescription>
+                      <FormLabel>Group chat</FormLabel>
                     </div>
                   </FormItem>
                 )}
-              /> */}
-              <FormField
-                control={form.control}
-                name="userEmail"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>User email:</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="email"
-                        {...field}
-                        placeholder="example@example.com"
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
               />
+              {!isGroup ? (
+                <FormField
+                  control={form.control}
+                  name="userEmail"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>User email</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="email"
+                          {...field}
+                          placeholder="example@example.com"
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+              ) : (
+                <>
+                  <FormField
+                    control={form.control}
+                    name="groupName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Group name</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="text"
+                            {...field}
+                            placeholder="example name"
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="groupDescription"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Group description</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="text"
+                            {...field}
+                            placeholder="example description"
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  <UploadProfilePic imgUrl={imgUrl} setImgUrl={setImgUrl} />
+                </>
+              )}
               <Button type="submit">Create</Button>
             </form>
           </Form>

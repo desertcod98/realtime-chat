@@ -10,7 +10,7 @@ Realtime chat created using:
 \
 -NextAuth
 \
--Postgres DB
+-Postgres DB on Supabase
 \
 -React query
 \

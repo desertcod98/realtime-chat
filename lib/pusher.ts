@@ -2,22 +2,20 @@ import PusherServer from 'pusher'
 import PusherClient from 'pusher-js'
 
 export const pusherServer = new PusherServer({
-  // host: process.env.NEXT_PUBLIC_SOKET_URL!,
-  // port: '6001',
-  appId: process.env.NEXT_PUBLIC_app_id!,
-  key: process.env.NEXT_PUBLIC_key!,
-  secret: process.env.secret!,
+  host: process.env.NEXT_PUBLIC_SOKETI_URL!,
+  appId: process.env.NEXT_PUBLIC_SOKETI_APP_ID!,
+  key: process.env.NEXT_PUBLIC_SOKETI_APP_KEY!,
+  secret: process.env.SOKETI_APP_SECRET!,
   cluster: 'eu',
   useTLS: true,
 });
 
 export const pusherClient = new PusherClient(
-  process.env.NEXT_PUBLIC_key!,
+  process.env.NEXT_PUBLIC_SOKETI_APP_KEY!,
   {
-    // wsHost: process.env.NEXT_PUBLIC_SOKET_URL!,
-    // wsPort: 6001,
-    // forceTLS: false,
-    // enabledTransports: ['ws', 'wss'],
+    wsHost: process.env.NEXT_PUBLIC_SOKETI_URL!,
+    enabledTransports: ['ws', 'wss'],
     cluster: 'eu',
   }
 );
+

@@ -9,6 +9,6 @@ interface AttachmentProps {
 
 export default function Attachment({ url, name }: AttachmentProps) {
   return (
-    <Image src={url} alt={name} width={300} height={100} className="object-contain rounded-md max-h-60"/>
+    <Image src={url} alt={name} width={300} height={100} className="object-contain rounded-md max-h-60 cursor-pointer"/>
   );
 }

@@ -10,6 +10,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import MessageAttachment from "./AddMessageAttachments";
 import { useState } from "react";
 import { useChatMutation } from "@/app/hooks/use-chat-query";
+import UploadAttachment from "./UploadAttachment";
 
 const formSchema = z.object({
   content: z.string().min(1).optional(),
@@ -63,38 +64,55 @@ export default function ChatInput({ chatId }: { chatId: string }) {
   }
 
   return (
-    <Form {...form}>
-      {files.map((file) => {
-        return <span key={file.size}>{file.name}</span>;
-      })}
-      <form onSubmit={form.handleSubmit(onSubmit)} className="w-full">
-        <FormField
-          control={form.control}
-          name="content"
-          render={({ field }) => (
-            <FormItem>
-              <FormControl>
-                <div className="w-full flex items-center">
-                  <div className="absolute left-2">
-                    <MessageAttachment
-                      addFiles={
-                        (newFiles: File[]) => setFiles([...files, ...newFiles]) //TODO check if file is already in list
-                      }
+    <div className="flex flex-col w-full gap-2">
+      {files && files.length > 0 && (
+        <div className="w-full h-60 bg-slate-200 flex items-center p-3 rounded-xl">
+          {files.map((file) => {
+            return (
+              <UploadAttachment
+                url={URL.createObjectURL(file)}
+                name={file.name}
+                key={file.name}
+                removeAttachment={() =>
+                  setFiles(files.filter((f) => f.name !== file.name))
+                }
+              />
+            );
+          })}
+        </div>
+      )}
+
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="w-full">
+          <FormField
+            control={form.control}
+            name="content"
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <div className="w-full flex items-center">
+                    <div className="absolute left-2">
+                      <MessageAttachment
+                        addFiles={
+                          (newFiles: File[]) =>
+                            setFiles([...files, ...newFiles]) //TODO check if file is already in list
+                        }
+                      />
+                    </div>
+                    <Input
+                      disabled={isLoading}
+                      type="text"
+                      className="w-full pl-10"
+                      placeholder="Send a message"
+                      {...field}
                     />
                   </div>
-                  <Input
-                    disabled={isLoading}
-                    type="text"
-                    className="w-full pl-10"
-                    placeholder="Send a message"
-                    {...field}
-                  />
-                </div>
-              </FormControl>
-            </FormItem>
-          )}
-        />
-      </form>
-    </Form>
+                </FormControl>
+              </FormItem>
+            )}
+          />
+        </form>
+      </Form>
+    </div>
   );
 }

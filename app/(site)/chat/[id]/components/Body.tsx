@@ -67,9 +67,9 @@ export default function Body({
   }, [data]);
 
   return (
-    <div className="flex flex-col gap-5 relative w-full h-full">
+    <div className="flex flex-col relative w-full h-full">
       <div
-        className="flex-1 flex flex-col-reverse mt-auto overflow-y-auto h-full gap-5 mb-14"
+        className="flex-1 flex flex-col-reverse mt-auto overflow-y-auto h-full gap-5"
       >
         <div ref={bottomRef} />
         {data?.pages?.map((group, i) => (
@@ -81,7 +81,7 @@ export default function Body({
         ))}
         <div ref={ref} className="w-full mt-5"></div>
       </div>
-      <div className="absolute bottom-5 w-[97%] flex justify-center">
+      <div className="w-[97%] flex justify-center mb-3">
         <ChatInput chatId={chatId}/>
       </div>
     </div>

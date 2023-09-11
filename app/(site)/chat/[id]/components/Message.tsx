@@ -25,7 +25,7 @@ export default function Message({
         </div>
       </div>
       {message.messageFiles && message.messageFiles.length > 0 && (
-        <div className="flex items-center ml-14 max-h-60 bg-slate-50 mr-14 w-fit rounded-xl">
+        <div className="flex w-fit max-w-[90%] items-center ml-14 max-h-60 gap-5 bg-slate-50 mr-14 rounded-xl overflow-x-auto">
           {message.messageFiles.map(file => {
             return <Attachment key={file.url} {...file}/>
           })}

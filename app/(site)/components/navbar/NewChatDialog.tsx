@@ -64,6 +64,8 @@ export default function NewChatDialog() {
     },
   });
 
+  const isLoading = form.formState.isSubmitting;
+
   function onSubmit(data: z.infer<typeof formSchema>) {
     fetch("/api/chat", {
       method: "POST",
@@ -173,7 +175,7 @@ export default function NewChatDialog() {
                   <UploadProfilePic imgUrl={imgUrl} setImgUrl={setImgUrl} />
                 </>
               )}
-              <Button type="submit">Create</Button>
+              <Button type="submit" disabled={isLoading}>Create</Button>
             </form>
           </Form>
         </DialogHeader>

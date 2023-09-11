@@ -67,7 +67,7 @@ export default function ChatInput({ chatId }: { chatId: string }) {
   return (
     <div className="flex flex-col w-full gap-2">
       {files && files.length > 0 && (
-        <div className="w-full h-60 bg-slate-200 flex items-center p-3 rounded-xl gap-3">
+        <div className="w-full h-60 bg-slate-200 flex items-center p-3 rounded-xl gap-3 overflow-x-auto">
           {files.map((file) => {
             return (
               <UploadAttachment

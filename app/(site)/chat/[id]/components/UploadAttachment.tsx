@@ -15,7 +15,7 @@ export default function UploadAttachment({
   removeAttachment,
 }: UploadAttachmentProps) {
   return (
-    <div className="relative">
+    <div className="relative  flex items-center">
       <div className="absolute top-0 right-0 cursor-pointer" onClick={removeAttachment}>
         <Image
           src={x}
@@ -30,7 +30,7 @@ export default function UploadAttachment({
         alt={name}
         width={300}
         height={100}
-        className="object-contain rounded-md max-h-60"
+        className="object-contain rounded-md max-h-60 min-w-[225px]"
       />
     </div>
   );

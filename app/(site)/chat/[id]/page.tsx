@@ -4,6 +4,7 @@ import { members, messages } from "@/db/schema";
 import { and, desc, eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import Body from "./components/Body";
+import Header from "./components/Header";
 
 interface ChatParams {
   id: string;
@@ -31,7 +32,23 @@ export default async function Chat({ params }: { params: ChatParams }) {
         chat: {
           columns: {
             isGroup: true,
-          }
+            image: true,
+            id: true,
+            name: true,
+          },
+          with: {
+            members: {
+              with: {
+                user: {
+                  columns: {
+                    image: true,
+                    name: true,
+                    id: true,
+                  },
+                },
+              },
+            },
+          },
         },
       },
       where: and(eq(members.userId, user.id), eq(members.chatId, params.id)),
@@ -43,9 +60,21 @@ export default async function Chat({ params }: { params: ChatParams }) {
     redirect("/");
   }
   return (
-    <Body
-      isGroup={memberData.chat.isGroup}
-      chatId={memberData.chatId}
-    />
+    <div className="flex flex-col relative h-full w-full ">
+      <Header
+        chatImage={
+          !memberData.chat.isGroup
+            ? memberData.chat.members[0].user.image
+            : memberData.chat.image
+        }
+        chatName={
+          !memberData.chat.isGroup
+            ? memberData.chat.members[0].user.name!
+            : memberData.chat.name!
+        }
+        profileId={!memberData.chat.isGroup ? memberData.chat.members[0].user.id : memberData.chat.id}
+      />
+      <Body isGroup={memberData.chat.isGroup} chatId={memberData.chatId} />
+    </div>
   );
 }

@@ -77,12 +77,12 @@ export const chats = pgTable("chats", {
 export const invites = pgTable("invites", {
   id: serial('id').primaryKey(),
   createdAt: timestamp('created_at').notNull().defaultNow(),
-  expiresAt: timestamp('expires_at').notNull(),
-  code:  uuid('id').default(sql`gen_random_uuid()`).notNull(),
+  expiresAt: timestamp('expires_at').notNull().default(sql`CURRENT_TIMESTAMP + interval '14 days'`),
+  code:  uuid('id').default(sql`gen_random_uuid()`),
   inviterId: integer('inviter_id').notNull().references(() => members.id),
-  invitedId: text('invited_id').notNull().references(() => users.id),
+  invitedId: text('invited_id').references(() => users.id),
 }, (t) => ({
-  unq: unique().on(t.inviterId, t.invitedId, t.expiresAt),
+  unq: unique().on(t.inviterId, t.expiresAt),
 }))
 
 export const invitesRelations = relations(invites, ({one}) => ({

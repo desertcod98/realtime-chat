@@ -2,7 +2,6 @@
 
 import { FullMessage } from "@/app/types";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import Image from "next/image";
 import Attachment from "./Attachment";
 
 export default function Message({

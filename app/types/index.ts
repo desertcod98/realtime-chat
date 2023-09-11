@@ -27,3 +27,16 @@ export type FullMessage = {
     }
   }[];
 }
+
+export type FullMember = {
+  id: number;
+  userId: string;
+  createdAt: Date;
+  chatId: string;
+  isAdministrator: boolean | null;
+  isRemoved: boolean | null;
+  user: {
+    name: string;
+    image: string | null;
+  };
+}; 

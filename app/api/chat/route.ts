@@ -96,7 +96,7 @@ export async function POST(request: Request) {
         })
         .returning();
         await db.insert(members).values(
-          { chatId: newChat.id, userId: user.id },
+          { chatId: newChat.id, userId: user.id, isAdministrator: true, },
         );
     }
 

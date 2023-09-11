@@ -4,7 +4,7 @@ Realtime chat created using:
 \
 -NextJS
 \
--Websockets (Hosting a [Soketi](https://docs.soketi.app/) server on [Render](https://render.com/)) and using websockets
+-Websockets (Hosting a [Soketi](https://docs.soketi.app/) server on [Render](https://render.com/))
 \
 -Drizzle ORM
 \

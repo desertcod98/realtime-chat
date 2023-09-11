@@ -1,6 +1,7 @@
 import getCurrentUser from "@/app/actions/getCurrentUser";
 import db from "@/db";
 import { chats, invites, members, users } from "@/db/schema";
+import { pusherServer } from "@/lib/pusher";
 import { and, eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { z } from "zod";
@@ -57,6 +58,8 @@ export async function POST(
       inviterId: chat.members.id,
       invitedId: invitedUser.id,
     })
+
+    //TRIGER WEBSOCKET UPDATE
 
     return NextResponse.json(invite);
   } catch (error: any) {

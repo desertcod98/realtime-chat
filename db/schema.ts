@@ -82,7 +82,7 @@ export const invites = pgTable("invites", {
   inviterId: integer('inviter_id').notNull().references(() => members.id),
   invitedId: text('invited_id').references(() => users.id),
 }, (t) => ({
-  unq: unique().on(t.inviterId, t.expiresAt),
+  unq: unique().on(t.inviterId, t.createdAt),
 }))
 
 export const invitesRelations = relations(invites, ({one}) => ({

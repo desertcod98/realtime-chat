@@ -14,7 +14,7 @@ export type FullMessage = {
     user: {
       name: string;
       image: string | null;
-    }
+    };
   };
   seenMessages: {
     createdAt: Date;
@@ -23,10 +23,10 @@ export type FullMessage = {
       user: {
         name: string;
         image: string | null;
-      }
-    }
+      };
+    };
   }[];
-}
+};
 
 export type FullMember = {
   id: number;
@@ -39,4 +39,23 @@ export type FullMember = {
     name: string;
     image: string | null;
   };
-}; 
+};
+
+export type FullInvite = {
+  id: number;
+  expiresAt: Date;
+  inviterId: number;
+  inviter: {
+    id: number;
+    user: {
+      name: string;
+      image: string | null;
+    };
+    chat: {
+      id: string;
+      name: string | null;
+      image: string | null;
+      isGroup: boolean;
+    };
+  };
+};

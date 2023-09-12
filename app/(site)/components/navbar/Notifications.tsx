@@ -19,69 +19,24 @@ export default function Notifications() {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <div>
+        <div className="relative">
+          {notifications.data && notifications.data.length > 0 && (
+            <div className="absolute top-0 right-0 bg-red-500 rounded-full w-4 h-4 flex items-center justify-center">
+              <span>{notifications.data.length}</span>
+            </div>
+          )}
           <IoMdNotificationsOutline size={35} className="cursor-pointer" />
         </div>
       </PopoverTrigger>
       <PopoverContent className="w-80">
         {notifications.data && notifications.data.length > 0 ? (
           notifications.data.map((notification) => {
-            return <Notification {...notification} key={notification.id}/>;
+            return <Notification {...notification} key={notification.id} />;
           })
-        ) : (
+        ) : (                             
           <span>No notifications.</span>
         )}
       </PopoverContent>
     </Popover>
-    // <Popover>
-    //   <PopoverTrigger asChild>
-    // <IoMdNotificationsOutline size={35} className="cursor-pointer"/>
-    //   </PopoverTrigger>
-    //   <PopoverContent className="w-80 max-h-80">
-    //   <div className="grid gap-4">
-    //       <div className="space-y-2">
-    //         <h4 className="font-medium leading-none">Dimensions</h4>
-    //         <p className="text-sm text-muted-foreground">
-    //           Set the dimensions for the layer.
-    //         </p>
-    //       </div>
-    //       <div className="grid gap-2">
-    //         <div className="grid grid-cols-3 items-center gap-4">
-    //           <Label htmlFor="width">Width</Label>
-    //           <Input
-    //             id="width"
-    //             defaultValue="100%"
-    //             className="col-span-2 h-8"
-    //           />
-    //         </div>
-    //         <div className="grid grid-cols-3 items-center gap-4">
-    //           <Label htmlFor="maxWidth">Max. width</Label>
-    //           <Input
-    //             id="maxWidth"
-    //             defaultValue="300px"
-    //             className="col-span-2 h-8"
-    //           />
-    //         </div>
-    //         <div className="grid grid-cols-3 items-center gap-4">
-    //           <Label htmlFor="height">Height</Label>
-    //           <Input
-    //             id="height"
-    //             defaultValue="25px"
-    //             className="col-span-2 h-8"
-    //           />
-    //         </div>
-    //         <div className="grid grid-cols-3 items-center gap-4">
-    //           <Label htmlFor="maxHeight">Max. height</Label>
-    //           <Input
-    //             id="maxHeight"
-    //             defaultValue="none"
-    //             className="col-span-2 h-8"
-    //           />
-    //         </div>
-    //       </div>
-    //     </div>
-
-    //   </PopoverContent>
-    // </Popover>
   );
 }

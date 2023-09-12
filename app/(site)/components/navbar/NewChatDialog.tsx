@@ -49,6 +49,7 @@ const formSchema = z.discriminatedUnion("isGroup", [
 ]);
 
 export default function NewChatDialog() {
+  const [open, setIsOpen] = useState(false);
   const router = useRouter();
   const [isGroup, setIsGroup] = useState(false);
   const [imgUrl, setImgUrl] = useState<string>();
@@ -82,19 +83,21 @@ export default function NewChatDialog() {
       } else {
         toast.success("Chat created!");
         router.refresh();
+        setIsOpen(false);
       }
     });
   }
   return (
-    <Dialog
+  <>
+  <AiOutlinePlus size={35} className="opacity-80 cursor-pointer" onClick={() => setIsOpen(true)}/>
+  <Dialog
       onOpenChange={() => {
         form.reset();
         setIsGroup(false);
+        setIsOpen(false);
       }}
+      open={open}
     >
-      <DialogTrigger>
-        <AiOutlinePlus size={35} className="opacity-80" />
-      </DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Create new chat</DialogTitle>
@@ -180,5 +183,7 @@ export default function NewChatDialog() {
         </DialogHeader>
       </DialogContent>
     </Dialog>
+  </>
+    
   );
 }

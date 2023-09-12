@@ -2,7 +2,7 @@
 
 import { FullMessage } from "@/app/types";
 import Message from "./Message";
-import { ElementRef, Fragment, useEffect, useRef, useState } from "react";
+import { ElementRef, Fragment, useEffect, useRef } from "react";
 import { useChatQuery } from "@/app/hooks/use-chat-query";
 import { useInView } from "react-intersection-observer";
 import ChatInput from "./ChatInput";

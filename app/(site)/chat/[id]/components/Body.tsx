@@ -67,7 +67,7 @@ export default function Body({
   }, [data]);
 
   return (
-    <div className="flex flex-col relative w-full h-full pt-20">
+    <div className="flex flex-col relative w-full h-full pt-[90px]">
       <div
         className="flex-1 flex flex-col-reverse mt-auto overflow-y-auto h-full gap-5"
       >

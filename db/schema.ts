@@ -2,6 +2,7 @@ import { relations, sql } from 'drizzle-orm';
 import {
   boolean,
   integer,
+  pgEnum,
   pgTable,
   primaryKey,
   serial,
@@ -74,13 +75,16 @@ export const chats = pgTable("chats", {
   created_at: timestamp('created_at').notNull().defaultNow(),
 })
 
+export const inviteState = pgEnum('inviteState', ['ACCEPTED', 'REJECTED', 'PENDING']);
+
 export const invites = pgTable("invites", {
   id: serial('id').primaryKey(),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   expiresAt: timestamp('expires_at').notNull().default(sql`CURRENT_TIMESTAMP + interval '14 days'`),
-  code:  uuid('id').default(sql`gen_random_uuid()`),
+  code:  uuid('code').default(sql`gen_random_uuid()`),
   inviterId: integer('inviter_id').notNull().references(() => members.id),
   invitedId: text('invited_id').references(() => users.id),
+  state: inviteState('state').default('PENDING').notNull(),
 }, (t) => ({
   unq: unique().on(t.inviterId, t.createdAt),
 }))

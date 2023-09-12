@@ -20,6 +20,7 @@ export const useChatQuery = (chatId: string) => {
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status } =
     useInfiniteQuery({
+      refetchOnWindowFocus: false,
       queryKey: [`chat:${chatId}`],
       queryFn: fetchMessages,
       getNextPageParam: (lastPage) => lastPage?.nextCursor,

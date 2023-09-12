@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/popover";
 
 import { IoMdNotificationsOutline } from "react-icons/io";
+import Notification from "./Notification";
 
 export default function Notifications() {
   const notifications = useNotifications();
@@ -25,7 +26,7 @@ export default function Notifications() {
       <PopoverContent className="w-80">
         {notifications.data && notifications.data.length > 0 ? (
           notifications.data.map((notification) => {
-            return <span key={notification.id}>{notification.id}</span>;
+            return <Notification {...notification} key={notification.id}/>;
           })
         ) : (
           <span>No notifications.</span>

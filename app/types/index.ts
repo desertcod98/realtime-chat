@@ -59,3 +59,11 @@ export type FullInvite = {
     };
   };
 };
+
+export type TempFullInvite = {
+  id: number;
+  inviterId: number;
+  inviterImage: string | null;
+  inviterName: string;
+  expiresAt: Date;
+}

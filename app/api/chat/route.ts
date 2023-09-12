@@ -1,7 +1,7 @@
 import getCurrentUser from "@/app/actions/getCurrentUser";
 import db from "@/db";
 import { chats, members, users } from "@/db/schema";
-import { eq, or, and, sql } from "drizzle-orm";
+import { eq, or, and, sql, placeholder } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { NextResponse } from "next/server";
 import { z } from "zod";
@@ -25,6 +25,64 @@ const PostData = z.discriminatedUnion("isGroup", [
   }),
 ]);
 
+const pInvitedUser = db
+  .select({ id: users.id })
+  .from(users)
+  .where(eq(users.email, placeholder("email")))
+  .limit(1)
+  .prepare("p_invited_user");
+
+const m1 = alias(members, "m1");
+const m2 = alias(members, "m2");
+
+const pExistingChat = db
+  .select({ id: chats.id })
+  .from(chats)
+  .innerJoin(m1, eq(chats.id, m1.chatId))
+  .innerJoin(m2, eq(chats.id, m2.chatId))
+  .where(
+    and(
+      eq(m1.userId, placeholder("userId")),
+      eq(m2.userId, placeholder("invitedUserId")),
+      eq(chats.isGroup, false)
+    )
+  )
+  .prepare("p_existing_chat");
+
+const pNewMembers = db
+  .insert(members)
+  .values([
+    { chatId: placeholder("newChatId"), userId: placeholder("userId") },
+    { chatId: placeholder("newChatId"), userId: placeholder("invitedUserId") },
+  ])
+  .prepare("p_new_members");
+
+const pNewChat = db
+  .insert(chats)
+  .values({ created_at: chats.created_at.default })
+  .returning()
+  .prepare("p_new_chat");
+
+const pNewGroupChat = db
+  .insert(chats)
+  .values({
+    isGroup: true,
+    image: placeholder("imgUrl"),
+    name: placeholder("groupName"),
+    description: placeholder("groupDescription"),
+  })
+  .returning()
+  .prepare("p_new_group_chat");
+
+const pNewGroupMember = db
+  .insert(members)
+  .values({
+    chatId: placeholder("newChatId"),
+    userId: placeholder("userId"),
+    isAdministrator: true,
+  })
+  .prepare("p_new_group_member");
+
 export async function POST(request: Request) {
   const user = await getCurrentUser();
   if (!user) return new NextResponse("Forbidden", { status: 403 });
@@ -39,11 +97,9 @@ export async function POST(request: Request) {
 
     let newChat;
     if (!zodParse.data.isGroup) {
-      const [invitedUser] = await db
-        .select({ id: users.id })
-        .from(users)
-        .where(eq(users.email, zodParse.data.userEmail))
-        .limit(1);
+      const [invitedUser] = await pInvitedUser.execute({
+        email: zodParse.data.userEmail,
+      });
 
       if (!invitedUser) {
         return new NextResponse("User not found", { status: 400 });
@@ -56,48 +112,32 @@ export async function POST(request: Request) {
       // INNER JOIN members m2 ON c.id = m2.chat_id
       // WHERE m1.user_id = 1 AND m2.user_id = 2 AND c.is_group = false;
 
-      const m1 = alias(members, "m1");
-      const m2 = alias(members, "m2");
+      // const m1 = alias(members, "m1");
+      // const m2 = alias(members, "m2");
 
-      const existingChat = await db
-        .select({ id: chats.id })
-        .from(chats)
-        .innerJoin(m1, eq(chats.id, m1.chatId))
-        .innerJoin(m2, eq(chats.id, m2.chatId))
-        .where(
-          and(
-            eq(m1.userId, user.id),
-            eq(m2.userId, invitedUser.id),
-            eq(chats.isGroup, false)
-          )
-        );
+      const existingChat = await pExistingChat.execute({
+        userId: user.id,
+        invitedUserId: invitedUser.id,
+      });
 
       if (existingChat.length > 0) {
         return new NextResponse("Chat already exists", { status: 400 });
       }
 
-      [newChat] = await db
-        .insert(chats)
-        .values({ created_at: chats.created_at.default })
-        .returning();
+      [newChat] = await pNewChat.execute();
 
-      await db.insert(members).values([
-        { chatId: newChat.id, userId: user.id },
-        { chatId: newChat.id, userId: invitedUser.id },
-      ]);
+      await pNewMembers.execute({
+        newChatId: newChat.id,
+        userId: user.id,
+        invitedUserId: invitedUser.id,
+      });
     } else {
-      [newChat] = await db
-        .insert(chats)
-        .values({
-          isGroup: true,
-          image: zodParse.data.imgUrl,
-          name: zodParse.data.groupName,
-          description: zodParse.data.groupDescription,
-        })
-        .returning();
-        await db.insert(members).values(
-          { chatId: newChat.id, userId: user.id, isAdministrator: true, },
-        );
+      [newChat] = await pNewGroupChat.execute({
+        imgUrl: zodParse.data.imgUrl ?? null,
+        groupName: zodParse.data.groupName ?? null,
+        groupDescription: zodParse.data.groupDescription ?? null,
+      });
+      await pNewGroupMember.execute({newChatId: newChat.id, userId: user.id})
     }
 
     return NextResponse.json(newChat);

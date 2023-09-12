@@ -5,11 +5,140 @@ import { pusherServer } from "@/lib/pusher";
 import s3 from "@/lib/s3";
 import { GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { and, desc, eq, lt } from "drizzle-orm";
+import { and, desc, eq, lt, placeholder } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
 const messages_batch = 17;
+
+const pGetMessagesCursor = db.query.members
+  .findFirst({
+    with: {
+      chat: {
+        columns: {
+          id: true,
+        },
+        with: {
+          messages: {
+            where: placeholder("cursor")
+              ? lt(messages.id, placeholder("cursor"))
+              : undefined,
+            limit: messages_batch,
+            orderBy: desc(messages.id),
+            with: {
+              messageFiles: {
+                columns: {
+                  key: true,
+                  name: true,
+                },
+              },
+              member: {
+                columns: {
+                  id: true,
+                },
+                with: {
+                  user: {
+                    columns: {
+                      name: true,
+                      image: true,
+                    },
+                  },
+                },
+              },
+              seenMessages: {
+                columns: {
+                  createdAt: true,
+                },
+                with: {
+                  member: {
+                    columns: {
+                      id: true,
+                    },
+                    with: {
+                      user: {
+                        columns: {
+                          name: true,
+                          image: true,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    where: and(
+      eq(members.chatId, placeholder("chatId")),
+      eq(members.userId, placeholder("userId"))
+    ),
+  })
+  .prepare("p_get_messages_cursor");
+
+const pGetMessages = db.query.members
+  .findFirst({
+    with: {
+      chat: {
+        columns: {
+          id: true,
+        },
+        with: {
+          messages: {
+            limit: messages_batch,
+            orderBy: desc(messages.id),
+            with: {
+              messageFiles: {
+                columns: {
+                  key: true,
+                  name: true,
+                },
+              },
+              member: {
+                columns: {
+                  id: true,
+                },
+                with: {
+                  user: {
+                    columns: {
+                      name: true,
+                      image: true,
+                    },
+                  },
+                },
+              },
+              seenMessages: {
+                columns: {
+                  createdAt: true,
+                },
+                with: {
+                  member: {
+                    columns: {
+                      id: true,
+                    },
+                    with: {
+                      user: {
+                        columns: {
+                          name: true,
+                          image: true,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    where: and(
+      eq(members.chatId, placeholder("chatId")),
+      eq(members.userId, placeholder("userId"))
+    ),
+  })
+  .prepare("p_get_messages");
 
 export async function GET(
   request: Request,
@@ -35,67 +164,13 @@ export async function GET(
   }
 
   try {
-    member = await db.query.members.findFirst({
-      with: {
-        chat: {
-          columns: {
-            id: true,
-          },
-          with: {
-            messages: {
-              where: cursor ? lt(messages.id, cursor) : undefined,
-              limit: messages_batch,
-              orderBy: desc(messages.id),
-              with: {
-                messageFiles: {
-                  columns: {
-                    key: true,
-                    name: true,
-                  },
-                },
-                member: {
-                  columns: {
-                    id: true,
-                  },
-                  with: {
-                    user: {
-                      columns: {
-                        name: true,
-                        image: true,
-                      },
-                    },
-                  },
-                },
-                seenMessages: {
-                  columns: {
-                    createdAt: true,
-                  },
-                  with: {
-                    member: {
-                      columns: {
-                        id: true,
-                      },
-                      with: {
-                        user: {
-                          columns: {
-                            name: true,
-                            image: true,
-                          },
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-      where: and(
-        eq(members.chatId, params.chatId),
-        eq(members.userId, user.id)
-      ),
-    });
+    member = cursor
+      ? await pGetMessagesCursor.execute({
+          cursor,
+          chatId: params.chatId,
+          userId: user.id,
+        })
+      : await pGetMessages.execute({ chatId: params.chatId, userId: user.id });
   } catch (e) {
     console.log(e, "GET_MESSAGES_ERROR");
     return new NextResponse("Bad request", { status: 400 });
@@ -141,6 +216,23 @@ export async function GET(
   }
 }
 
+
+
+const pMemberData = db
+.select({ id: members.id, name: users.name, image: users.image })
+.from(members)
+.innerJoin(users, eq(members.userId, users.id))
+.where(and(eq(members.userId, placeholder("userId")), eq(members.chatId, placeholder("chatId")))).prepare("p_member_data");
+
+const pNewMessage = db
+.insert(messages)
+.values({
+  chatId: placeholder("chatId"),
+  memberId: placeholder("memberId"),
+  content: placeholder("content"),
+})
+.returning().prepare("p_new_message");
+
 const PostData = z.object({
   content: z.union([z.string().length(0), z.string().min(1)]).optional(),
   uploadedFiles: z
@@ -181,25 +273,14 @@ export async function POST(
     ) {
       return new NextResponse("No message or files sent", { status: 400 });
     }
-
-    const memberData = await db
-      .select({ id: members.id, name: users.name, image: users.image })
-      .from(members)
-      .innerJoin(users, eq(members.userId, users.id))
-      .where(and(eq(members.userId, user.id), eq(members.chatId, chatId.data)));
+    
+    const memberData = await pMemberData.execute({userId: user.id, chatId: chatId.data})
 
     if (memberData.length === 0) {
       return new NextResponse("Forbidden", { status: 403 });
     }
 
-    const [newMessage] = await db
-      .insert(messages)
-      .values({
-        chatId: chatId.data,
-        memberId: memberData[0].id,
-        content: zodParse.data.content,
-      })
-      .returning();
+    const [newMessage] = await pNewMessage.execute({chatId: chatId.data, memberId: memberData[0].id, content: zodParse.data.content ?? null})
 
     let messageFilesUrls: any[] = [];
 

@@ -25,7 +25,7 @@ export default async function Footer() {
         </span>
       </Link>
       <div className="flex gap-6">
-        <Notifications />
+        <Notifications userId={user.id}/>
         <NewChatDialog />
         <LogoutButton />
       </div>

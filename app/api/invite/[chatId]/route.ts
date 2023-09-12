@@ -54,12 +54,25 @@ export async function POST(
       return new NextResponse("User already in chat", { status: 400 });
     }
 
-    const invite = await db.insert(invites).values({
+    const [invite] = await db.insert(invites).values({
       inviterId: chat.members.id,
       invitedId: invitedUser.id,
-    })
+    }).returning({id: invites.id});
 
-    //TRIGER WEBSOCKET UPDATE
+    const [fullInvite] = await db
+      .select({
+        id: invites.id,
+        inviterId: invites.inviterId,
+        inviterImage: users.image,
+        inviterName: users.name,
+        expiresAt: invites.expiresAt
+      })
+      .from(invites)
+      .innerJoin(members, eq(invites.inviterId, members.id))
+      .innerJoin(users, eq(members.userId, users.id))
+      .where(eq(invites.id, invite.id));
+
+    await pusherServer.trigger(`notifications=${invitedUser.id}`, "notification=new", fullInvite);
 
     return NextResponse.json(invite);
   } catch (error: any) {

@@ -12,9 +12,32 @@ import {
 
 import { IoMdNotificationsOutline } from "react-icons/io";
 import Notification from "./Notification";
+import { useEffect } from "react";
+import { pusherClient } from "@/lib/pusher";
+import { TempFullInvite } from "@/app/types";
+import { useQueryClient } from "@tanstack/react-query";
+import { Separator } from "@/components/ui/separator";
 
-export default function Notifications() {
+export default function Notifications({ userId }: { userId: string }) {
   const notifications = useNotifications();
+  const queryClient = useQueryClient();
+
+  const channelName = `notifications=${userId}`;
+
+  useEffect(() => {
+    pusherClient.subscribe(channelName);
+    pusherClient.bind("notification=new", onNewMessage);
+  }, []);
+
+  function onNewMessage(notification: TempFullInvite) {
+    queryClient.setQueryData(["notifications"], (oldData : any) => {
+      if (!oldData || oldData.length === 0) {
+        return [notification]
+      }else{
+        return [...oldData, notification]
+      }
+    });
+  }
 
   return (
     <Popover>
@@ -31,9 +54,14 @@ export default function Notifications() {
       <PopoverContent className="w-80">
         {notifications.data && notifications.data.length > 0 ? (
           notifications.data.map((notification) => {
-            return <Notification {...notification} key={notification.id} />;
+            return (
+              <>
+              <Notification {...notification} key={notification.id} />
+              <Separator className="my-2"/>
+              </>
+            );
           })
-        ) : (                             
+        ) : (
           <span>No notifications.</span>
         )}
       </PopoverContent>

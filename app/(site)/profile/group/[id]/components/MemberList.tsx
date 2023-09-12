@@ -17,10 +17,10 @@ export default function MemberList({
   isAdministrator: boolean;
 }) {
   return (
-    <ScrollArea className="h-[400px] w-[550px] rounded-md border">
+    <ScrollArea className="h-[392px] w-[550px] rounded-md border">
       {isAdministrator && <AddNewMember chatId={chatId} />}
 
-      {members.map((member) => {
+      {members.map((member, i) => {
         return (
           <>
             <div className="flex items-center p-2">
@@ -38,7 +38,7 @@ export default function MemberList({
               </Link>
               {member.isAdministrator && <Badge>Administrator</Badge>}
             </div>
-            <Separator className="my-2" />
+            <Separator className={members.length -1 === i ? "mt-2" : "my-2"} />
           </>
         );
       })}

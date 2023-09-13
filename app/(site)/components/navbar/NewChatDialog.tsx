@@ -24,7 +24,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 
-import { AiOutlinePlus } from "react-icons/ai";
+import { AiOutlinePlus } from "@react-icons/all-files/ai/AiOutlinePlus";
 import { z } from "zod";
 
 // const formSchema = z.object({

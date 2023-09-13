@@ -3,7 +3,9 @@
 import { useNotificationsMutation } from "@/app/hooks/use-notifications";
 import { TempFullInvite } from "@/app/types";
 
-import { AiFillDelete, AiFillCheckCircle } from "react-icons/ai";
+import { AiFillDelete } from "@react-icons/all-files/ai/AiFillDelete";
+import { AiFillCheckCircle } from "@react-icons/all-files/ai/AiFillCheckCircle";
+
 
 export default function Notification(notification: TempFullInvite) {
   const notificationMutation = useNotificationsMutation();

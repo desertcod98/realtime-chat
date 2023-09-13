@@ -6,7 +6,7 @@ import clsx from "clsx";
 import Image from "next/image";
 import { Dispatch, SetStateAction, useState } from "react";
 import Dropzone from "react-dropzone";
-import { AiOutlineCloudUpload } from "react-icons/ai";
+import { AiOutlineCloudUpload } from "@react-icons/all-files/ai/AiOutlineCloudUpload";
 
 export default function UploadProfilePic({
   imgUrl,

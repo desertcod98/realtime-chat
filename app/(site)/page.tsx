@@ -1,4 +1,5 @@
-import { BsChatLeftText } from "react-icons/bs";
+
+import { BsChatLeftText } from "@react-icons/all-files/bs/BsChatLeftText";
 
 export default async function Home() {
   return (

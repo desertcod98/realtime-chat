@@ -3,7 +3,7 @@
 import { Separator } from "@/components/ui/separator";
 import { useState } from "react";
 import toast from "react-hot-toast";
-import { AiOutlinePlus } from "react-icons/ai";
+import { AiOutlinePlus } from "@react-icons/all-files/ai/AiOutlinePlus";
 import NewMemberModal from "./NewMemberModal";
 
 export default function AddNewMember({chatId} : {chatId: string}) {

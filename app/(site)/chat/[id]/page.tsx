@@ -74,7 +74,7 @@ export default async function Chat({ params }: { params: ChatParams }) {
         }
         profileId={!memberData.chat.isGroup ? memberData.chat.members[0].user.id : memberData.chat.id}
       />
-      <Body isGroup={memberData.chat.isGroup} chatId={memberData.chatId} />
+      <Body isGroup={memberData.chat.isGroup} chatId={memberData.chatId} userId={user.id}/>
     </div>
   );
 }

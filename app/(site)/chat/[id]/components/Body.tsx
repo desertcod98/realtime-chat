@@ -12,7 +12,9 @@ import { useQueryClient } from "@tanstack/react-query";
 export default function Body({
   chatId,
   isGroup,
+  userId
 }: {
+  userId: string,
   chatId: string;
   isGroup: boolean;
 }) {
@@ -75,7 +77,7 @@ export default function Body({
         {data?.pages?.map((group, i) => (
           <Fragment key={i}>
             {group.items.map((message: FullMessage) => (
-              <Message key={message.id} message={message} isGroup={isGroup} />
+              <Message key={message.id} message={message} isGroup={isGroup} userId={userId}/>
             ))}
           </Fragment>
         ))}

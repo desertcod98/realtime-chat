@@ -98,6 +98,7 @@ const pGetMessages = db.query.members
               member: {
                 columns: {
                   id: true,
+                  userId: true,
                 },
                 with: {
                   user: {
@@ -219,7 +220,7 @@ export async function GET(
 
 
 const pMemberData = db
-.select({ id: members.id, name: users.name, image: users.image })
+.select({ id: members.id, name: users.name, image: users.image, userId: users.id })
 .from(members)
 .innerJoin(users, eq(members.userId, users.id))
 .where(and(eq(members.userId, placeholder("userId")), eq(members.chatId, placeholder("chatId")))).prepare("p_member_data");
@@ -311,6 +312,7 @@ export async function POST(
       ...newMessage,
       member: {
         id: memberData[0].id,
+        userId: memberData[0].userId,
         user: {
           name: memberData[0].name,
           image: memberData[0].image,

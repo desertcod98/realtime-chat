@@ -11,6 +11,7 @@ export type FullMessage = {
   }[];
   member: {
     id: number;
+    userId: string;
     user: {
       name: string;
       image: string | null;

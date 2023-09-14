@@ -3,7 +3,7 @@
 import { FullMessage } from "@/app/types";
 import Message from "./Message";
 import { ElementRef, Fragment, useEffect, useRef } from "react";
-import { useChatQuery } from "@/app/hooks/use-chat-query";
+import { ChatQueryData, useChatQuery } from "@/app/hooks/use-chat-query";
 import { useInView } from "react-intersection-observer";
 import ChatInput from "./ChatInput";
 import { pusherClient } from "@/lib/pusher";
@@ -24,7 +24,6 @@ export default function Body({
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status } =
     useChatQuery(chatId);
-
 
     function onNewMessage(message: FullMessage){
       queryClient.setQueryData(["chat:"+chatId], (oldData : any) => {
@@ -51,11 +50,25 @@ export default function Body({
       })
     }
 
+    function onMessageDeleted({messageId} : {messageId: number}){
+      queryClient.setQueryData(["chat:"+chatId], (oldData : any) => {
+        if (!oldData || !oldData.pages || oldData.pages.length === 0) {
+          return {pages: [{items: []}]};
+        }
+        const newData : {pages: {items: []}[]}= {pages: []}
+        for (const page of oldData.pages){
+        newData.pages.push({items: page.items.filter((i: any) => i.id !== messageId)})
+        }
+        return newData; 
+      })
+    }
+
     const channelName = `chat=${chatId}`;
 
     useEffect(() => {
       pusherClient.subscribe(channelName);
       pusherClient.bind('message=new', onNewMessage);
+      pusherClient.bind('message=deleted', onMessageDeleted);
     }, []);
 
   useEffect(() => {

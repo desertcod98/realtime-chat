@@ -1,6 +1,6 @@
 import qs from "query-string";
 import { useInfiniteQuery, useMutation } from "@tanstack/react-query";
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 import toast from "react-hot-toast";
 
 export const useChatQuery = (chatId: string) => {
@@ -55,7 +55,7 @@ export const useChatMutation = () => {
     },
     onError: (err: any) => {
       console.log(err);
-      if(err.response && err.response.data) toast.error(err.response.data);
+      if (err.response && err.response.data) toast.error(err.response.data);
     },
   });
 };

@@ -121,7 +121,7 @@ export const messageFiles = pgTable("message_files", {
   createdAt: timestamp('created_at').notNull().defaultNow(),
   key: text('key').notNull(),
   name: text('name').notNull(),
-  messageId: integer('message_id').notNull().references(() => messages.id),
+  messageId: integer('message_id').notNull().references(() => messages.id, {onDelete: 'cascade'}),
 }, (t) => ({
   unq: unique().on(t.key, t.name),
 }))

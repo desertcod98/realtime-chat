@@ -14,7 +14,7 @@ export default async function Footer() {
   }
 
   return (
-    <div className="w-full h-24 border-t-2 flex items-center px-3 justify-between pr-10">
+    <div className="w-full h-24 min-h-[96px] border-t-2 flex items-center px-3 justify-between pr-10">
       <Link href={"/profile"} className="flex w-2/5 gap-5 items-center">
         <Avatar className="cursor-pointer hover:opacity-80">
           <AvatarImage src={user.image ?? undefined} />

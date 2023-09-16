@@ -15,12 +15,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
 import { formatDate } from "@/lib/date";
 
-
 const formSchema = z.object({
-  content: z
-    .union([z.string().length(0), z.string().min(1)])
-    .optional()
-    .transform((e) => (e === "" ? undefined : e)),
+  content: z.string().min(1),
 });
 
 export default function Message({
@@ -73,12 +69,12 @@ export default function Message({
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onEdit)} className="w-full">
         <div className="flex flex-col gap-3 hover:bg-slate-200 rounded-md w-[97%] relative group">
-          <div className="flex items-center gap-5">
+          <div className="flex items-center gap-5 w-full">
             <Avatar className="cursor-pointer hover:opacity-80">
               <AvatarImage src={message.member.user.image ?? undefined} />
               <AvatarFallback>{message.member.user.name[0]}</AvatarFallback>
             </Avatar>
-            <div className="flex flex-col w-full">
+            <div className="flex flex-col w-[95%]">
               <div className="flex gap-3 items-center">
                 <h3 className="font-semibold">{message.member.user.name}</h3>
                 <span className="text-sm">
@@ -91,7 +87,7 @@ export default function Message({
                 )}
               </div>
               {!isEditing ? (
-                <span>{message.content}</span>
+                <span className="w-full break-words">{message.content}</span>
               ) : (
                 <FormField
                   control={form.control}

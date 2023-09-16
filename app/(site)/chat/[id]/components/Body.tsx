@@ -113,7 +113,7 @@ export default function Body({
 
   return (
     <div className="flex flex-col relative w-full h-full pt-[90px]">
-      <div className="flex-1 flex flex-col-reverse mt-auto overflow-y-auto h-full gap-5">
+      <div className="flex-1 flex flex-col-reverse mt-auto overflow-y-auto h-full gap-5 w-full">
         <div ref={bottomRef} />
         {data?.pages?.map((group, i) => (
           <Fragment key={i}>

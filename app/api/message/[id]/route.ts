@@ -52,7 +52,7 @@ export async function DELETE(
 }
 
 const PatchData = z.object({
-  content: z.string().optional(),
+  content: z.string().min(1),
 });
 
 export async function PATCH(

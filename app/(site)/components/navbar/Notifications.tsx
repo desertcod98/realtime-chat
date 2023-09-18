@@ -10,7 +10,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
-import { IoMdNotificationsOutline } from "react-icons/io";
+import { IoMdNotificationsOutline } from "@react-icons/all-files/io/IoMdNotificationsOutline";
 import Notification from "./Notification";
 import { useEffect } from "react";
 import { pusherClient } from "@/lib/pusher";

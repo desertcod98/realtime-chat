@@ -35,7 +35,7 @@ export default async function Navbar() {
 
   return (
     <div className="flex flex-col justify-between h-full">
-      <NavbarChats membersData={membersData} />
+      <NavbarChats membersData={membersData} userId={user.id}/>
       <Footer/>
     </div>  
   );

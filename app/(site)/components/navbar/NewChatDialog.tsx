@@ -26,6 +26,7 @@ import toast from "react-hot-toast";
 
 import { AiOutlinePlus } from "@react-icons/all-files/ai/AiOutlinePlus";
 import { z } from "zod";
+import sFetch from "@/lib/fetch";
 
 // const formSchema = z.object({
 //   userEmail: z.string().min(1),
@@ -67,123 +68,118 @@ export default function NewChatDialog() {
   const isLoading = form.formState.isSubmitting;
 
   function onSubmit(data: z.infer<typeof formSchema>) {
-    fetch("/api/chat", {
-      method: "POST",
-      body: JSON.stringify(
-        !isGroup
-          ? data
-          : {
-              ...data,
-              imgUrl,
-            }
-      ),
-    }).then((res) => {
-      if (res.status !== 200) {
-        res.text().then((error) => toast.error(error));
-      } else {
-        toast.success("Chat created!");
-        router.refresh();
-        setIsOpen(false);
-      }
+    sFetch("/api/chat", "POST", !isGroup ? data : { imgUrl, ...data }, () => {
+      toast.success("Chat created!");
+      router.refresh();
+      setIsOpen(false);
     });
   }
+  
   return (
-  <>
-  <AiOutlinePlus size={35} className="opacity-80 cursor-pointer" onClick={() => setIsOpen(true)}/>
-  <Dialog
-      onOpenChange={() => {
-        form.reset();
-        setIsGroup(false);
-        setIsOpen(false);
-      }}
-      open={open}
-    >
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Create new chat</DialogTitle>
-          <Form {...form}>
-            <form className="space-y-5" onSubmit={form.handleSubmit(onSubmit)}>
-              <FormField
-                control={form.control}
-                name="isGroup"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 shadow mt-5">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={(e) => {
-                          field.onChange(e);
-                          setIsGroup((c) => !c);
-                        }}
-                      />
-                    </FormControl>
-                    <div className="space-y-1 leading-none">
-                      <FormLabel>Group chat</FormLabel>
-                    </div>
-                  </FormItem>
-                )}
-              />
-              {!isGroup ? (
+    <>
+      <AiOutlinePlus
+        size={35}
+        className="opacity-80 cursor-pointer"
+        onClick={() => setIsOpen(true)}
+      />
+      <Dialog
+        onOpenChange={() => {
+          form.reset();
+          setIsGroup(false);
+          setIsOpen(false);
+        }}
+        open={open}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create new chat</DialogTitle>
+            <Form {...form}>
+              <form
+                className="space-y-5"
+                onSubmit={form.handleSubmit(onSubmit)}
+              >
                 <FormField
                   control={form.control}
-                  name="userEmail"
+                  name="isGroup"
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>User email</FormLabel>
+                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 shadow mt-5">
                       <FormControl>
-                        <Input
-                          type="email"
-                          {...field}
-                          placeholder="example@example.com"
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={(e) => {
+                            field.onChange(e);
+                            setIsGroup((c) => !c);
+                          }}
                         />
                       </FormControl>
+                      <div className="space-y-1 leading-none">
+                        <FormLabel>Group chat</FormLabel>
+                      </div>
                     </FormItem>
                   )}
                 />
-              ) : (
-                <>
+                {!isGroup ? (
                   <FormField
                     control={form.control}
-                    name="groupName"
+                    name="userEmail"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Group name</FormLabel>
+                        <FormLabel>User email</FormLabel>
                         <FormControl>
                           <Input
-                            type="text"
+                            type="email"
                             {...field}
-                            placeholder="example name"
+                            placeholder="example@example.com"
                           />
                         </FormControl>
                       </FormItem>
                     )}
                   />
-                  <FormField
-                    control={form.control}
-                    name="groupDescription"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Group description</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="text"
-                            {...field}
-                            placeholder="example description"
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                  <UploadProfilePic imgUrl={imgUrl} setImgUrl={setImgUrl} />
-                </>
-              )}
-              <Button type="submit" disabled={isLoading}>Create</Button>
-            </form>
-          </Form>
-        </DialogHeader>
-      </DialogContent>
-    </Dialog>
-  </>
-    
+                ) : (
+                  <>
+                    <FormField
+                      control={form.control}
+                      name="groupName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Group name</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="text"
+                              {...field}
+                              placeholder="example name"
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="groupDescription"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Group description</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="text"
+                              {...field}
+                              placeholder="example description"
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <UploadProfilePic imgUrl={imgUrl} setImgUrl={setImgUrl} />
+                  </>
+                )}
+                <Button type="submit" disabled={isLoading}>
+                  Create
+                </Button>
+              </form>
+            </Form>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

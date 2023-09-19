@@ -33,40 +33,6 @@ export async function GET(request: Request) {
   try {
     const invitesData = await pInvitesData.execute({userId: user.id});
 
-    // const invitesData = await db.query.invites.findMany({
-    //   columns: {
-    //     id: true,
-    //     inviterId: true,
-    //     expiresAt: true,
-    //     createdAt: true,
-    //   },
-    //   with: {
-    //     inviter: {
-    //       columns: {
-    //         id: true,
-    //         createdAt: true,
-    //       },
-    //       with: {
-    //         user: {
-    //           columns: {
-    //             name: true,
-    //           image: true,
-    //           }
-    //         },
-    //         chat: {
-    //           columns: {
-    //             image: true,
-    //             isGroup: true,
-    //             name: true,
-    //             id: true,
-    //           }
-    //         }
-    //       }
-    //     }
-    //   },
-    //   where: eq(invites.invitedId, user.id),
-    // })
-
     return NextResponse.json(invitesData);
   } catch (error: any) {
     console.log(error, "GET_INVITES_ERROR");

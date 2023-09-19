@@ -1,7 +1,8 @@
 import getCurrentUser from "@/app/actions/getCurrentUser";
 import db from "@/db";
 import { chats, members, users } from "@/db/schema";
-import { eq, or, and, sql, placeholder } from "drizzle-orm";
+import { pusherServer } from "@/lib/pusher";
+import { eq, or, and, sql, placeholder, ne } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { NextResponse } from "next/server";
 import { z } from "zod";
@@ -131,13 +132,39 @@ export async function POST(request: Request) {
         userId: user.id,
         invitedUserId: invitedUser.id,
       });
+
+      const fullChat = await db.query.members.findFirst({
+        with: {
+          chat: {
+            with: {
+              members: {
+                with: {
+                  user: {
+                    columns: {
+                      name: true,
+                      image: true,
+                    },
+                  },
+                },
+                where: ne(members.userId, invitedUser.id),
+              },
+            },
+          },
+        },
+        where: eq(members.chatId, newChat.id),
+      });
+
+      if(!fullChat) return new NextResponse("Internal Error", { status: 500 })
+
+      await pusherServer.trigger(`chats=${invitedUser.id}`, "chats=new", fullChat);
+
     } else {
       [newChat] = await pNewGroupChat.execute({
         imgUrl: zodParse.data.imgUrl ?? null,
         groupName: zodParse.data.groupName ?? null,
         groupDescription: zodParse.data.groupDescription ?? null,
       });
-      await pNewGroupMember.execute({newChatId: newChat.id, userId: user.id})
+      await pNewGroupMember.execute({ newChatId: newChat.id, userId: user.id });
     }
 
     return NextResponse.json(newChat);

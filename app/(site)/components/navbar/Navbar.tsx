@@ -1,7 +1,7 @@
 import getCurrentUser from "@/app/actions/getCurrentUser";
 import db from "@/db";
-import { members } from "@/db/schema";
-import { eq, ne } from "drizzle-orm";
+import { members, messages } from "@/db/schema";
+import { desc, eq, ne } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import NavbarChats from "./NavbarChats";
 import Footer from "./Footer";
@@ -27,6 +27,10 @@ export default async function Navbar() {
             },
             where: ne(members.userId, user.id),
           },
+          messages: {
+            limit: 1,
+            orderBy: desc(messages.id),
+          }
         },
       },
     },

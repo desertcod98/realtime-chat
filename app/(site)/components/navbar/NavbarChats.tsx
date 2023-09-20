@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { pusherClient } from "@/lib/pusher";
 import toast from "react-hot-toast";
+import { PartialMessage } from "@/app/types";
 
 interface MemberData {
   id: number;
@@ -33,6 +34,7 @@ interface MemberData {
         image: string | null;
       };
     }[];
+    messages: PartialMessage[];
   };
 }
 
@@ -48,14 +50,16 @@ export default function NavbarChats({
   const [chats, setChats] = useState<MemberData[]>();
 
   function onNewChat(chat: MemberData) {
-    setChats(c => {
-      if(c){
+    setChats((c) => {
+      if (c) {
         return [...c, chat];
-      }else{
+      } else {
         return [chat];
       }
     });
-    toast.success(chat.chat.members[0].user.name + " created a private chat with you");
+    toast.success(
+      chat.chat.members[0].user.name + " created a private chat with you"
+    );
   }
 
   useEffect(() => {
@@ -94,6 +98,7 @@ export default function NavbarChats({
                   imgUrl={member.chat.members[0].user.image ?? undefined}
                   setActive={() => setActiveChatId(member.chatId)}
                   active={activeChatId === member.chatId}
+                  lastMessage={member.chat.messages[0]}
                 />
               );
             } else {
@@ -113,6 +118,7 @@ export default function NavbarChats({
                   imgUrl={member.chat.image ?? undefined}
                   setActive={() => setActiveChatId(member.chatId)}
                   active={activeChatId === member.chatId}
+                  lastMessage={member.chat.messages[0]}
                 />
               );
             }

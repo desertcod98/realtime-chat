@@ -42,6 +42,14 @@ export type FullMember = {
   };
 };
 
+export type PartialMessage = {
+  id: number;
+  content: string | null;
+  createdAt: Date;
+  memberId: number;
+  updatedAt: Date;
+}
+
 export type FullInvite = {
   id: number;
   expiresAt: Date;

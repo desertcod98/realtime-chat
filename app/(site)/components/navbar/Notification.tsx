@@ -5,7 +5,6 @@ import { TempFullInvite } from "@/app/types";
 
 import { AiFillDelete } from "@react-icons/all-files/ai/AiFillDelete";
 import { AiFillCheckCircle } from "@react-icons/all-files/ai/AiFillCheckCircle";
-import Image from "next/image";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export default function Notification(notification: TempFullInvite) {

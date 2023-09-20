@@ -1,8 +1,8 @@
 "use client";
 
+import { PartialMessage } from "@/app/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import clsx from "clsx";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 export default function NavbarChat({
@@ -11,12 +11,14 @@ export default function NavbarChat({
   chatId,
   setActive,
   active,
+  lastMessage,
 }: {
   name: string;
   imgUrl?: string;
   chatId: string;
   active: boolean;
   setActive: () => void;
+  lastMessage: PartialMessage | undefined;
 }) {
   const router = useRouter();
   return (
@@ -39,7 +41,14 @@ export default function NavbarChat({
           <AvatarFallback>{name[0]}</AvatarFallback>
         </Avatar>
       </div>
-      <span>{name}</span>
+      <div className="flex flex-col gap-2 justify-start">
+        <span className="font-bold">{name}</span>
+        {lastMessage && (
+          <div className="flex gap-2">
+            <span>{lastMessage.content}</span> {/*TODO add sender if chat is group*/} 
+          </div>
+        )}
+      </div>
     </div>
   );
 }

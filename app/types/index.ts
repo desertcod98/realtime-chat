@@ -67,4 +67,6 @@ export type TempFullInvite = {
   inviterImage: string | null;
   inviterName: string;
   expiresAt: Date;
+  chatName: string;
+  chatImage: string;
 }

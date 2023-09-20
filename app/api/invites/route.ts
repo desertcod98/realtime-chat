@@ -1,6 +1,6 @@
 import getCurrentUser from "@/app/actions/getCurrentUser";
 import db from "@/db";
-import { invites, members, users } from "@/db/schema";
+import { chats, invites, members, users } from "@/db/schema";
 import { and, eq, placeholder } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
@@ -11,10 +11,13 @@ const pInvitesData = db
     inviterImage: users.image,
     inviterName: users.name,
     expiresAt: invites.expiresAt,
+    chatName: chats.name,
+    chatImage: chats.image,
   })
   .from(invites)
   .innerJoin(members, eq(invites.inviterId, members.id))
   .innerJoin(users, eq(members.userId, users.id))
+  .innerJoin(chats, eq(chats.id, members.chatId))
   .where(
     and(
       eq(invites.invitedId, placeholder("userId")),

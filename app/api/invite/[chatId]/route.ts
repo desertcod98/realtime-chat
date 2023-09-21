@@ -32,14 +32,14 @@ export async function POST(
     }
 
     const [chat] = await db
-      .select({chatId: chats.id, memberId: members.id})
+      .select()
       .from(chats)
       .innerJoin(members, eq(members.chatId, chats.id))
       .where(
-        and(eq(members.isAdministrator, true), eq(members.userId, user.id), eq(chats.id, chatId.data))
+        and(eq(members.isAdministrator, true), eq(members.userId, user.id))
       );
 
-    if (!chat) {
+    if (!chat ) {
       return new NextResponse("Forbidden", { status: 403 });
     }
 
@@ -49,13 +49,13 @@ export async function POST(
       return new NextResponse("User not found", { status: 400 });
     }
 
-    const [existingMember] = await db.select().from(members).where(and(eq(members.chatId, chatId.data), eq(members.userId, invitedUser.id)));
+    const [existingMember] = await db.select().from(members).where(and(eq(members.chatId, chat.chats.id), eq(members.userId, invitedUser.id)));
     if(existingMember) {
       return new NextResponse("User already in chat", { status: 400 });
     }
 
     const [invite] = await db.insert(invites).values({
-      inviterId: chat.memberId,
+      inviterId: chat.members.id,
       invitedId: invitedUser.id,
     }).returning({id: invites.id});
 
@@ -65,14 +65,11 @@ export async function POST(
         inviterId: invites.inviterId,
         inviterImage: users.image,
         inviterName: users.name,
-        expiresAt: invites.expiresAt,
-        chatName: chats.name,
-        chatImage: chats.image,
+        expiresAt: invites.expiresAt
       })
       .from(invites)
       .innerJoin(members, eq(invites.inviterId, members.id))
       .innerJoin(users, eq(members.userId, users.id))
-      .innerJoin(chats, eq(chats.id, members.chatId))
       .where(eq(invites.id, invite.id));
 
     await pusherServer.trigger(`notifications=${invitedUser.id}`, "notification=new", fullInvite);

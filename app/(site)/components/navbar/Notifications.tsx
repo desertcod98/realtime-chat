@@ -27,11 +27,11 @@ export default function Notifications({ userId }: { userId: string }) {
   }, []);
 
   function onNewMessage(notification: TempFullInvite) {
-    queryClient.setQueryData(["notifications"], (oldData : any) => {
+    queryClient.setQueryData(["notifications"], (oldData: any) => {
       if (!oldData || oldData.length === 0) {
-        return [notification]
-      }else{
-        return [...oldData, notification]
+        return [notification];
+      } else {
+        return [...oldData, notification];
       }
     });
   }
@@ -48,13 +48,13 @@ export default function Notifications({ userId }: { userId: string }) {
           <IoMdNotificationsOutline size={35} className="cursor-pointer" />
         </div>
       </PopoverTrigger>
-      <PopoverContent className="w-80">
+      <PopoverContent className="w-[420px] shadow-xl border-2 border-slate-400">
         {notifications.data && notifications.data.length > 0 ? (
           notifications.data.map((notification) => {
             return (
               <>
-              <Notification {...notification} key={notification.id} />
-              <Separator className="my-2"/>
+                <Notification {...notification} key={notification.id} />
+                <Separator className="my-2" />
               </>
             );
           })
